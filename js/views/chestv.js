@@ -17,7 +17,7 @@
   function still() { return !!(global.matchMedia && global.matchMedia('(prefers-reduced-motion: reduce)').matches); }
 
   /* the names on the chest: ruled level lines from the picture's sides, each ending ON its part (CircLearn.labels) */
-  function namer(stage) {
+  function namer(stage, topGap) {
     var svg = document.createElementNS(NS, 'svg'); svg.setAttribute('class', 'c3v__svg'); svg.setAttribute('aria-hidden', 'true');
     stage.appendChild(svg);
     return function draw(A, list) {
@@ -26,10 +26,10 @@
       svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
       var f = W < 420 ? 12.5 : 13.5, band = Math.max(86, W * .2);
       var items = list.map(function (q) {
-        var p = A.project(q.g, q.i, false);
+        var p = q.at || A.project(q.g, q.i, false);
         return { id: q.id, text: q.text, x: p.x, y: p.y, side: q.side || (p.x < W / 2 ? 'L' : 'R') };
       });
-      var o = { left: band, right: W - band, font: f, top: 26, bottom: H - 8, gap: 5 };
+      var o = { left: band, right: W - band, font: f, top: topGap || 26, bottom: H - 8, gap: 5 };
       svg.innerHTML = global.CircLearn.labels(Object.assign({}, o, { items: items.filter(function (q) { return q.side === 'L'; }), width: band - 14 })) +
         global.CircLearn.labels(Object.assign({}, o, { items: items.filter(function (q) { return q.side === 'R'; }), width: band - 14 }));
     };
@@ -107,6 +107,8 @@
       global.GasChest.load(host, {}).then(function (a) {
         loading = false; if (!a) return;
         A = a; A.onDraw(names);
+        /* this picture is about where the parts are, not what they are doing: the muscles in their ordinary colour, clearly apart from the lungs */
+        ['diaphragm', 'ext', 'int'].forEach(function (g) { A.contract(g, .55); });
         a.el.addEventListener('click', function (e) {
           if (Math.abs(e.clientX - downX) + Math.abs(e.clientY - downY) > 6) return;
           var r = a.el.getBoundingClientRect(), p = a.partAt(e.clientX - r.left, e.clientY - r.top); if (!p) return;
@@ -162,105 +164,169 @@
   Views.add('system', system);
 
   /* ------------------------------------------------------------------ station 5 ------------------------------------ */
-  /* what each card shows: the pose the chest goes to, what glows, where the camera stands, and the names */
+  /* what each card shows: the pose the chest goes to, and the look that shows it best. The diaphragm and the external intercostal
+     muscles contract together, so every card of a breath in shows the same whole breath */
   var POSES = {
-    diaphragm: { q: 0, d: 1, glow: { diaphragm: .34 }, view: 'cut', cut: .1, name: [['dia', 'diaphragm: contracts and flattens', 'R']] },
-    external: { q: 1, d: 0, glow: { ext: .42 }, view: 'side', cut: 1.7, name: [['sExt', 'external intercostal muscles contract', 'L'], ['sRib', 'ribs move upwards and outwards', 'L']] },
-    volume: { q: 1, d: 1, glow: { diaphragm: .22, ext: .28 }, view: 'cut', cut: .1, name: [['lung', 'lungs: larger volume', 'L']] },
-    out: { q: 0, d: 0, glow: {}, view: 'cut', cut: .1, name: [['dia', 'diaphragm: relaxes, dome-shaped', 'R']] },
-    internal: { q: -.35, d: -.35, glow: { int: .46 }, view: 'side', cut: 1.7, name: [['sInt', 'internal intercostal muscles contract', 'R'], ['sRib', 'ribs move downwards and inwards', 'L']] }
+    diaphragm: { q: 1, d: 1, mode: 'dome', phase: 'in' },
+    external: { q: 1, d: 1, mode: 'ribs', phase: 'in' },
+    volume: { q: 1, d: 1, mode: 'whole', phase: 'in', names: [['lung', 'lungs: larger volume', 'L']] },
+    out: { q: 0, d: 0, mode: 'whole', phase: 'out', names: [['dia', 'diaphragm: relaxes, dome-shaped', 'R']] },
+    internal: { q: -.35, d: -.35, mode: 'ribsIn', phase: 'hard' }
+  };
+  /* the names in each look, for what the chest is doing */
+  var NAMES = {
+    whole: {
+      rest: [['tr2', 'trachea', 'R'], ['bronchus', 'bronchus', 'R'], ['lung', 'lung', 'L'], ['rib', 'rib', 'R'], ['dia', 'diaphragm', 'R']],
+      in: [['dia', 'diaphragm contracts', 'R'], ['rib', 'ribs: upwards and outwards', 'R']],
+      out: [['dia', 'diaphragm relaxes', 'R'], ['rib', 'ribs: downwards and inwards', 'R']],
+      hard: [['intL', 'internal intercostal muscles contract', 'L'], ['rib', 'ribs: downwards and inwards', 'R']]
+    },
+    dome: {
+      rest: [['ten', 'central tendon: does not contract', 'L'], ['mus', 'muscle fibres', 'R']],
+      in: [['ten', 'tendon: pulled down', 'L'], ['mus', 'muscle fibres contract: they become shorter', 'R'], ['gap', 'more space: larger volume', 'L']],
+      out: [['ten', 'tendon: moves up', 'L'], ['mus', 'muscle fibres relax: they become longer', 'R']],
+      hard: [['ten', 'central tendon', 'L'], ['mus', 'muscle fibres: relaxed', 'R']]
+    },
+    ribs: {
+      rest: [['nExt', 'external intercostal muscles', 'L'], ['nRib', 'rib', 'R']],
+      in: [['nExt', 'external intercostal muscles contract', 'L'], ['nRib', 'ribs: upwards and outwards', 'R']],
+      out: [['nExt', 'external intercostal muscles relax', 'L'], ['nRib', 'ribs: downwards and inwards', 'R']]
+    },
+    ribsOut: {
+      rest: [['nExt', 'external intercostal muscles', 'L'], ['nRib', 'rib', 'R']],
+      out: [['nExt', 'external intercostal muscles relax', 'L'], ['lInt', 'internal intercostal muscles contract', 'L'], ['nRib', 'ribs: downwards and inwards', 'R']]
+    },
+    ribsIn: {
+      rest: [['lInt', 'internal intercostal muscles', 'L'], ['nRib', 'rib', 'R']],
+      hard: [['lInt', 'internal intercostal muscles contract', 'L'], ['nRib', 'ribs: further downwards and inwards', 'R']]
+    }
   };
 
   function breathe(spec, ctx) {
+    var GC = global.GasChest;
     var root = h('div', 'c3v');
     var stage = h('div', 'c3v__stage'), host = h('div', 'c3v__c3'); stage.appendChild(host);
     root.appendChild(stage);
-    var G = global.GasChest.gauges(); root.appendChild(G.el);
-    root.appendChild(h('p', 'c3v__hint', 'Hold the button to breathe in. Release the button to breathe out.'));
+    var marksSvg = document.createElementNS(NS, 'svg'); marksSvg.setAttribute('class', 'c3v__marks'); marksSvg.setAttribute('aria-hidden', 'true'); stage.appendChild(marksSvg);
+    var KEY = GC.keyRow(); root.appendChild(KEY.el);
+    var MS = GC.muscles(); root.appendChild(MS.el);
+    var G = GC.gauges(); root.appendChild(G.el);
     var bar = h('div', 'c3v__bar');
     var bIn = btn('c3v__b c3v__b--go', 'Hold to breathe in'), bOut = btn('c3v__b c3v__b--hard', 'Hold to breathe out hard');
-    var vCut = btn('c3v__b', 'Cut open'), vSide = btn('c3v__b', 'From the side');
-    [bIn, bOut, vCut, vSide].forEach(function (b) { bar.appendChild(b); });
+    var vWhole = btn('c3v__b', 'Whole chest'), vDome = btn('c3v__b', 'Diaphragm'), vRibs = btn('c3v__b', 'Rib muscles');
+    [bIn, bOut].forEach(function (b) { bar.appendChild(b); });
     root.appendChild(bar);
-    /* at rest the chest names its parts, as every station's picture does */
-    var REST = { cut: [['trachea', 'trachea', 'R'], ['bronchus', 'bronchus', 'R'], ['lung', 'lung', 'L'], ['rib', 'rib', 'R'], ['dia', 'diaphragm', 'R']],
-                 side: [['sRib', 'rib', 'L'], ['sExt', 'external intercostal muscles', 'L'], ['sInt', 'internal intercostal muscles', 'R']] };
-    var A = null, AN = null, name = namer(stage), q = 0, d = 0, tq = 0, td = 0, tView = 'cut', cutAt = .1, cutTo = .1, raf = 0, last = 0, labels = REST.cut, glow = {};
+    /* what to look at: at the top of the picture they change */
+    var views = h('div', 'c3v__views');
+    [vWhole, vDome, vRibs].forEach(function (b) { views.appendChild(b); });
+    stage.appendChild(views);
+    var A = null, AN = null, name = namer(stage, 48), q = 0, d = 0, ci = 0, tq = 0, td = 0, raf = 0, last = 0;
+    var mode = 'whole', from = 'whole', mk = 1, turned = false, phase = 'rest', custom = null;
     var RATE = 1.15;      /* how fast the chest follows, per second; a breath in takes about two seconds */
     function vol(a, b) { return A ? A.volumeAt(a, b) : (a + b) / 2; }
-    function setView(v) {
-      if (labels === REST[tView]) labels = REST[v];
-      tView = v; cutTo = v === 'cut' ? .1 : 1.7;
-      vCut.setAttribute('aria-pressed', v === 'cut' ? 'true' : 'false'); vSide.setAttribute('aria-pressed', v === 'side' ? 'true' : 'false');
-      if (A) A.view(v, still() ? 0 : 900);
-      go();
-    }
-    function apply(rate) {
+    function list() { var m = NAMES[mode]; return custom || (m[phase] && m[phase].length ? m[phase] : m.rest); }
+    function drawNames() {
       if (!A) return;
-      A.pose(q, d); A.cut(true, cutAt);
-      ['diaphragm', 'ext', 'int'].forEach(function (g) { A.glow(g, glow[g] || 0); });
-      A.tone('diaphragm', tView === 'cut' ? (glow.diaphragm ? 1 : .66) : 1);
-      G.show(vol(q, d), rate);
-      name(A, labels.map(function (l) { var a = AN[l[0]]; return { id: l[0], text: l[1], g: a[0], i: a[1], side: l[2] }; }));
+      /* no names while the camera moves: each would stand on the wrong part */
+      name(A, mk < 1 && !GC.sameCamera(from, mode) ? [] : list().filter(function (l) { return l[0] !== 'gap' || d > .28; }).map(function (l) {
+        var x = AN[l[0]];
+        return { id: l[0], text: l[1], g: x[0], i: x[1], side: l[2], at: l[0] === 'gap' ? GC.gapAt(A, x) : null };
+      }));
+    }
+    function drawMarks() {
+      if (!A) return;
+      var s = A.size(); if (!s[0]) return;
+      marksSvg.setAttribute('viewBox', '0 0 ' + s[0] + ' ' + s[1]);
+      marksSvg.innerHTML = GC.marks(A, from, mode, mk, 1, 1);
+    }
+    function apply(rate, cr) {
+      if (!A) return;
+      var c = GC.pose(A, q, d, ci);
+      GC.look(A, from, mode, mk, mk < 1 || turned);
+      turned = false;
+      GC.ghosts(A, from, mode, mk, q, d);
+      G.show(vol(q, d), rate); MS.show(c, cr); KEY.show(mode);
+      A.now();
+      drawMarks(); drawNames();
     }
     function tick(ts) {
       raf = 0;
       var dt = last ? Math.min(.05, (ts - last) / 1000) : .016; last = ts;
-      var v0 = vol(q, d), k = 1 - Math.exp(-RATE * 2.2 * dt);
+      var v0 = vol(q, d), c0 = GC.contracted(q, d, ci), k = 1 - Math.exp(-RATE * 2.2 * dt);
       q += (tq - q) * k; d += (td - d) * k;
-      cutAt += (cutTo - cutAt) * Math.min(1, dt * 3.4);
       if (Math.abs(tq - q) < .003) q = tq;
       if (Math.abs(td - d) < .003) d = td;
-      if (Math.abs(cutTo - cutAt) < .004) cutAt = cutTo;
-      apply((vol(q, d) - v0) / dt);
-      if (q !== tq || d !== td || cutAt !== cutTo) raf = requestAnimationFrame(tick);
-      else { last = 0; apply(0); }
+      var wi = wantI();
+      ci += (wi - ci) * (1 - Math.exp(-dt * 6));
+      if (Math.abs(wi - ci) < .006) ci = wi;
+      if (mk < 1) { mk = Math.min(1, mk + dt / .95); if (mk === 1) turned = true; }
+      var c1 = GC.contracted(q, d, ci);
+      apply((vol(q, d) - v0) / dt, { dia: (c1.dia - c0.dia) / dt, ext: (c1.ext - c0.ext) / dt, int: (c1.int - c0.int) / dt });
+      if (q !== tq || d !== td || ci !== wi || mk < 1) raf = requestAnimationFrame(tick);
+      else { last = 0; settle(); apply(0, null); }
+    }
+    /* the internal intercostal muscles: fully in a hard breath out, part of the way while the ribs move down in an ordinary one */
+    function wantI() { return phase === 'hard' ? 1 : phase === 'out' && q > .004 ? .6 : 0; }
+    /* once the chest has stopped at rest, no name still says that something is moving, and the external muscles are solid again */
+    function settle() {
+      if (phase === 'out' && !custom && q === 0 && d === 0) { phase = 'rest'; if (mode === 'ribsOut') setMode('ribs'); }
     }
     function go() {
-      if (still()) { q = tq; d = td; cutAt = cutTo; apply(0); return; }
+      if (still()) { q = tq; d = td; ci = wantI(); if (mk < 1) { mk = 1; turned = true; } settle(); ci = wantI(); if (mk < 1) { mk = 1; turned = true; } apply(0, null); return; }
       if (!raf) { last = 0; raf = requestAnimationFrame(tick); }
     }
-    function target(a, b, gl, names) { tq = a; td = b; glow = gl || {}; labels = names && names.length ? names : REST[tView]; go(); }
+    function press() {
+      vWhole.setAttribute('aria-pressed', mode === 'whole' ? 'true' : 'false');
+      vDome.setAttribute('aria-pressed', mode === 'dome' ? 'true' : 'false');
+      vRibs.setAttribute('aria-pressed', mode === 'ribs' || mode === 'ribsOut' || mode === 'ribsIn' ? 'true' : 'false');
+    }
+    function setMode(m) {
+      if (m !== mode) { from = mode; mode = m; mk = 0; custom = null; }
+      press();
+      go();
+    }
+    function target(a, b, ph, names) { tq = a; td = b; phase = ph; custom = names || null; go(); }
     /* the two hold buttons: the pointer, or the keyboard (space or Enter held) */
     function holdable(b, on, off) {
       var held = false;
-      function press(e) { if (held) return; held = true; b.classList.add('is-on'); if (e && e.pointerId != null && b.setPointerCapture) { try { b.setPointerCapture(e.pointerId); } catch (x) {} } on(); }
+      function down(e) { if (held) return; held = true; b.classList.add('is-on'); if (e && e.pointerId != null && b.setPointerCapture) { try { b.setPointerCapture(e.pointerId); } catch (x) {} } on(); }
       function free() { if (!held) return; held = false; b.classList.remove('is-on'); off(); }
-      b.addEventListener('pointerdown', function (e) { e.preventDefault(); press(e); });
+      b.addEventListener('pointerdown', function (e) { e.preventDefault(); down(e); });
       ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(function (t) { b.addEventListener(t, free); });
-      b.addEventListener('keydown', function (e) { if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) { e.preventDefault(); press(); } });
+      b.addEventListener('keydown', function (e) { if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) { e.preventDefault(); down(); } });
       b.addEventListener('keyup', function (e) { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); free(); } });
       b.addEventListener('blur', free);
     }
-    holdable(bIn, function () { target(1, 1, { diaphragm: .3, ext: .34 }, tView === 'cut' ? [['dia', 'diaphragm contracts', 'R']] : [['sExt', 'external intercostal muscles contract', 'L']]); },
-      function () { target(0, 0, {}, tView === 'cut' ? [['dia', 'diaphragm relaxes', 'R']] : [['sExt', 'external intercostal muscles relax', 'L']]); });
-    holdable(bOut, function () { target(-.35, -.35, { int: .46 }, tView === 'cut' ? [['intL', 'internal intercostal muscles contract', 'L']] : [['sInt', 'internal intercostal muscles contract', 'R']]); },
-      function () { target(0, 0, {}, []); });
-    vCut.addEventListener('click', function () { setView('cut'); });
-    vSide.addEventListener('click', function () { setView('side'); });
-    vCut.setAttribute('aria-pressed', 'true'); vSide.setAttribute('aria-pressed', 'false');
+    holdable(bIn, function () { if (mode === 'ribsIn' || mode === 'ribsOut') setMode('ribs'); target(1, 1, 'in'); },
+      function () { if (mode === 'ribs' && q > .05) setMode('ribsOut'); target(0, 0, 'out'); });
+    /* the internal muscles lie under the external ones: close to the ribs, a hard breath out shows them */
+    holdable(bOut, function () { if (mode === 'ribs' || mode === 'ribsOut') setMode('ribsIn'); target(-.35, -.35, 'hard'); }, function () { target(0, 0, 'rest'); });
+    vWhole.addEventListener('click', function () { setMode('whole'); });
+    vDome.addEventListener('click', function () { setMode('dome'); });
+    vRibs.addEventListener('click', function () { setMode('ribs'); });
+    press();
     var loading = false;
     function load() {
       if (A || loading) return; loading = true;
-      global.GasChest.load(host, {}).then(function (a) {
+      GC.load(host, {}).then(function (a) {
         loading = false; if (!a) return;
-        A = a; AN = global.GasChest.anchors(A); A.view('cut'); A.cut(true, .1); apply(0);
-        A.onDraw(function () { if (!raf) name(A, labels.map(function (l) { var x = AN[l[0]]; return { id: l[0], text: l[1], g: x[0], i: x[1], side: l[2] }; })); });
+        A = a; AN = GC.anchors(A); GC.look(A, mode, mode, 1); apply(0, null);
+        A.onDraw(function () { if (!raf) { drawMarks(); drawNames(); } });
         if (pending) { var p = pending; pending = null; api.focus(p); }
       });
     }
     var pending = null;
     root.__chest = function () { return A; };   /* for tools/pins.mjs */
-    G.show(0, 0);
+    G.show(0, 0); KEY.show('whole');
     var api = {
       el: root, say: 'A real human chest. Hold a button to make the chest breathe', credit: CREDIT_B,
       labels: { diaphragm: 'diaphragm', external: 'external intercostal muscles', volume: 'volume of the thorax', out: 'breathing out', internal: 'internal intercostal muscles' },
       focus: function (part) {
         if (!A) { pending = part; load(); return; }
-        if (!part) { setView('cut'); target(0, 0, {}, []); return; }
+        if (!part) { setMode('whole'); target(0, 0, 'rest'); return; }
         var P = POSES[part]; if (!P) return;
-        if (P.view !== tView) setView(P.view);
-        target(P.q, P.d, P.glow, P.name);
+        setMode(P.mode);
+        target(P.q, P.d, P.phase, P.names);
       },
       start: function () { load(); if (A) { A.resize(); A.kick(); } },
       stop: function () { if (raf) { cancelAnimationFrame(raf); raf = 0; } }

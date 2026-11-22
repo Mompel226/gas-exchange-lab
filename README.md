@@ -15,7 +15,7 @@ by **Dr Daniel Mompel Riera**
 
 </div>
 
-![The Gas Exchange Lab: a real human chest, cut open from the front, beside the station's cards](docs/img/screen.jpg)
+![The Gas Exchange Lab: a real human diaphragm, its white tendon and its contracted muscle fibres, beside the station's cards](docs/img/screen.jpg)
 
 ---
 
@@ -30,7 +30,7 @@ in its order and in its words. Then the questions say right or wrong, never the 
 | 🫁 **8 stations** | the breathing system · the gas exchange surface · inspired and expired air · testing air with limewater · breathing in and out · physical activity and breathing · protecting the breathing system · your breathing-rate investigation |
 | ✍️ **60 questions** | fill the gaps · multiple choice · put in order · match up · sort into groups · tick a grid · drag the words · press the part on a drawing |
 | 🦴 **A real chest in 3D** | the ribs, the external and internal intercostal muscles, the diaphragm, the lungs and the airways of one real body. Turn it, and take off each layer to see what lies under it |
-| 🌬️ **Breathe with your finger** | hold a button and the chest breathes in; hold the other and it breathes out hard. The ribs, the muscles, the diaphragm, the volume, the pressure and the air all move together |
+| 🌬️ **Breathe with your finger** | hold a button and the chest breathes in; hold the other and it breathes out hard. Look at the whole chest, the diaphragm or the rib muscles: the muscle fibres become shorter as they contract, beside the white tendon that does not, and the volume, the pressure and the air follow |
 | 🫧 **Gases crossing the wall** | oxygen and carbon dioxide molecules cross the wall of an alveolus in both directions, drawn to scale, with the net movement of each gas |
 | 🧪 **A limewater bench** | breathe in and out through two tubes of limewater and see which one turns cloudy first |
 | ❌ **Remember it with X** | Dr Mompel's own diagram to fill in: in e**x**piration, the e**x**ternal intercostal muscles rela**x** |

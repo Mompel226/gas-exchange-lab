@@ -29,7 +29,7 @@
     { head: X('Expiration'), cls: 'ex', rows: [
       ['Diaphragm muscle', [CRS, 1], 'and', [SH, 1]],
       [X('External') + ' intercostal muscles', [CR, 1]],
-      ['Internal intercostal muscles', [CR, 0], '(when you breathe out hard)'],
+      ['Internal intercostal muscles', [CR, 0]],
       ['Ribs move', [UD, 1], 'and', [IO, 1]],
       ['Volume of the thorax', [ID, 1]],
       ['Pressure in the thorax', [ID, 0]],

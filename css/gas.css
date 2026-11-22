@@ -224,6 +224,9 @@ svg .lb__lead,svg .lb__halo{vector-effect:non-scaling-stroke}
   .platecol.is-folded{height:auto}
   .platecol.is-folded .viewhost,.platecol.is-folded .said{display:none}
     .platecol[data-kind="town"],.platecol[data-kind="defences"],.platecol[data-kind="gallery"]{position:relative;height:auto;box-shadow:none}
+  /* the breathing chest is a tool, with its buttons and gauges under the picture: it takes the height it needs, or they could not be reached */
+  .platecol[data-kind="breathe"]:not(.is-sim):not(.is-folded){position:relative;height:auto;box-shadow:none}
+  .platecol[data-kind="breathe"]:not(.is-sim):not(.is-folded) #viewHost{height:auto;flex:none}
   
   
 }
@@ -417,6 +420,43 @@ html[data-lab-tab="do"] .viewcol #viewHost .lb{display:none}
 .c3v__b--go.is-on{background:#fff;border-color:#fff}
 .c3v__b--hard{border-color:var(--c3-high);color:var(--c3-high)}
 .c3v__b--hard.is-on{background:var(--c3-high);color:#2B1604}
+/* the muscles on the chest: the fibres the picture follows, what each muscle is doing, and the key */
+.c3v__marks{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
+.c3f__h,.c3f__l{fill:none;stroke-linecap:round;stroke-linejoin:round}
+.c3f__h{stroke:#2A0B08;stroke-opacity:.6}
+.c3f__l{stroke:#FFE9C2}
+.c3f--int .c3f__l{stroke:#FFC15A}
+.c3f__p{fill:#fff;stroke:#2A0B08;stroke-width:1.4}
+.c3k{position:relative;z-index:2;display:flex;flex-wrap:wrap;justify-content:center;gap:2px 13px;padding:5px 10px;background:var(--c3-bg);border-top:1px solid rgba(255,255,255,.08);color:var(--c3-soft);font-size:12px;line-height:1.3}
+.c3k__i{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.c3k__s{display:block;flex:none;width:18px;height:10px;border-radius:2px}
+.c3k__s--pale{background:repeating-linear-gradient(90deg,#CFA59C 0 2px,#B98A80 2px 3px)}
+.c3k__s--deep{background:repeating-linear-gradient(90deg,#C8362B 0 2px,#8E1F17 2px 3px)}
+.c3k[data-look="ribsIn"] .c3k__s--pale{background:repeating-linear-gradient(90deg,#E2C79B 0 2px,#CDAE7E 2px 3px)}
+.c3k[data-look="ribsIn"] .c3k__s--deep{background:repeating-linear-gradient(90deg,#F2A22E 0 2px,#BE7412 2px 3px)}
+/* breathing out, seen through the external muscles: either layer can be the one that is contracted */
+.c3k[data-look="ribsOut"] .c3k__s--deep{background:linear-gradient(90deg,#C8362B 0 50%,#F2A22E 50% 100%)}
+.c3k__s--tendon{background:#F2EFE7}
+.c3k__s--rest{background:transparent;border:1.5px solid rgba(255,255,255,.72)}
+.c3k__s--fib{height:3px;border-radius:2px;background:#FFE9C2;box-shadow:-2px 0 0 1px #fff,2px 0 0 1px #fff}
+.c3m{position:relative;z-index:2;display:grid;grid-template-columns:auto auto auto;justify-content:space-between;gap:4px 8px;padding:6px 12px;background:var(--c3-bg);border-top:1px solid rgba(255,255,255,.08);color:var(--c3-ink)}
+.c3m__i{display:flex;align-items:center;gap:7px;min-width:0}
+.c3m__f{flex:none;width:36px;height:14px;overflow:visible}
+.c3m__e{fill:var(--c3-soft)}
+.c3m__b{fill:none;stroke-linecap:round;opacity:calc(.55 + .45 * var(--c3m,0))}
+.c3m__i--dia .c3m__b{stroke:#DE5546}
+.c3m__i--ext .c3m__b{stroke:#E8755F}
+.c3m__i--int .c3m__b{stroke:#E7A23C}
+.c3m__t{display:flex;flex-direction:column;min-width:0;line-height:1.16}
+.c3m__n{color:var(--c3-soft);font-size:11px;white-space:nowrap}
+.c3m__w{font-size:12.5px;font-weight:500;color:var(--c3-soft)}
+.c3m__i[data-s="on"] .c3m__w{font-weight:700;color:var(--c3-ink)}
+@container (max-width:560px){.c3m{grid-template-columns:repeat(3,minmax(0,1fr))}.c3m__f{display:none}.c3m__n{white-space:normal}}
+/* a short window: the rows under the picture close up, so that the picture keeps its room and nothing has to scroll */
+@media (min-width:1001px){.c3v__stage{min-height:180px}}
+@media (max-height:820px){.c3g{gap:2px;padding:4px 12px 5px}.c3k{padding:3px 10px}.c3m{padding:3px 12px}}
+.c3v__views{position:absolute;z-index:3;top:8px;left:50%;transform:translateX(-50%);display:flex;gap:2px;padding:3px;border-radius:var(--r-pill);background:rgba(10,18,26,.74);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);white-space:nowrap}
+.c3v__views .c3v__b{padding:4px 11px;font-size:12.5px;border-color:transparent}
 .c3v__hint{flex:none;margin:6px 0 0;text-align:center;font-size:13px;color:var(--c3-soft)}
 .sysv__d3{position:absolute;inset:0}
 
