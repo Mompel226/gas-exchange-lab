@@ -388,7 +388,7 @@ html[data-lab-tab="do"] .viewcol #viewHost .lb{display:none}
 .c3__load{position:absolute;inset:auto 0 44%;margin:0;text-align:center;font-size:13.5px;color:var(--c3-soft);z-index:2}
 .c3__load--no{inset:auto 12px 40%;color:var(--c3-ink)}
 .chest3d__canvas{display:block;touch-action:none;outline:none}
-.br__fig{position:relative;margin:0;background:radial-gradient(120% 90% at 50% 34%,var(--c3-bg2),var(--c3-bg) 72%);border-radius:14px;overflow:hidden}
+.br__fig{container-type:inline-size;position:relative;margin:0;background:radial-gradient(120% 90% at 50% 34%,var(--c3-bg2),var(--c3-bg) 72%);border-radius:14px;overflow:hidden}
 .br__svg{position:relative;z-index:1;display:block;width:100%;height:auto;pointer-events:none}
 .br__bg{fill:none}
 .br__c3{position:absolute;overflow:hidden;-webkit-mask-image:linear-gradient(to bottom,#000 76%,transparent);mask-image:linear-gradient(to bottom,#000 76%,transparent)}
@@ -420,7 +420,7 @@ html[data-lab-tab="do"] .viewcol #viewHost .lb{display:none}
 @container (max-width:440px){.c3g__row{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr)}.c3g__row .c3g__bar,.c3g__row .c3g__air{grid-column:1 / -1;grid-row:2}}
 
 /* the chest as a station's own picture (js/views/chestv.js) */
-.c3v{position:relative;display:flex;flex-direction:column;width:100%;height:100%;min-height:0;background:radial-gradient(120% 90% at 50% 36%,var(--c3-bg2),var(--c3-bg) 72%);border-radius:14px;overflow:hidden}
+.c3v{container-type:inline-size;position:relative;display:flex;flex-direction:column;width:100%;height:100%;min-height:0;background:radial-gradient(120% 90% at 50% 36%,var(--c3-bg2),var(--c3-bg) 72%);border-radius:14px;overflow:hidden}
 .c3v__stage{position:relative;flex:1 1 auto;min-height:260px}
 .c3v__c3{position:absolute;inset:0}
 .c3v__svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
@@ -470,7 +470,40 @@ html[data-lab-tab="do"] .viewcol #viewHost .lb{display:none}
 @media (max-height:820px){.c3g{gap:2px;padding:4px 12px 5px}.c3k{padding:3px 10px}.c3m{padding:3px 12px}}
 .c3v__views{position:absolute;z-index:3;top:8px;left:50%;transform:translateX(-50%);display:flex;gap:2px;padding:3px;border-radius:var(--r-pill);background:rgba(10,18,26,.74);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);white-space:nowrap}
 .c3v__views .c3v__b{padding:4px 11px;font-size:12.5px;border-color:transparent}
-.c3v__hint{flex:none;margin:6px 0 0;text-align:center;font-size:13px;color:var(--c3-soft)}
+.c3v__hint{flex:1 1 200px;max-width:250px;margin:0;align-self:center;text-align:left;font-size:12px;line-height:1.25;color:var(--c3-soft)}
+/* A 3D picture takes the whole column (Daniel, 23 Nov 2026: "try to optimize as much as possible ... the 3D in a Mac screen"): its caption and credit fold under a
+   small i on the picture; the key stands on the picture; the gauges and the two buttons share one row */
+.pinfo{position:absolute;z-index:5;right:8px;bottom:8px;color:var(--c3-ink)}
+.pinfo summary{display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:rgba(10,18,26,.8);border:1.5px solid rgba(255,255,255,.42);cursor:pointer;list-style:none}
+.pinfo summary::-webkit-details-marker{display:none}
+.pinfo summary span::before{content:'i';font:italic 700 15px/1 Georgia,'Times New Roman',serif}
+.pinfo[open] summary span::before{content:'\00D7';font:700 16px/1 var(--font)}
+.pinfo summary:hover{border-color:var(--c3-air)}
+.pinfo summary:focus-visible{outline:2px solid var(--c3-air);outline-offset:2px}
+.pinfo__t{position:absolute;right:0;bottom:32px;width:min(330px,calc(100vw - 40px));margin:0;padding:9px 12px;border-radius:10px;background:rgba(10,18,26,.94);border:1px solid rgba(255,255,255,.2);text-align:left}
+.pinfo__say{display:block;font-size:13px;font-weight:600;line-height:1.35;color:var(--c3-ink)}
+.pinfo__credit{display:block;margin-top:3px;font-size:11.5px;line-height:1.35;color:var(--c3-soft)}
+.c3k.c3k--over{position:absolute;z-index:2;left:50%;bottom:8px;transform:translateX(-50%);width:max-content;max-width:calc(100% - 84px);gap:2px 9px;padding:3px 10px;font-size:11.5px;border:0;border-radius:var(--r-pill);background:rgba(10,18,26,.76);pointer-events:none}
+.c3k.c3k--over .c3k__i[style*="hidden"]{display:none}
+.br__fig > .c3k.c3k--over{bottom:auto}
+.c3v__ctl{flex:none;display:flex;flex-direction:column}
+.sim:has(> .br__pack){padding:6px 8px 8px}
+.br__pack.is-onstage .br__c3{-webkit-mask-image:linear-gradient(to bottom,#000 90%,transparent);mask-image:linear-gradient(to bottom,#000 90%,transparent)}
+@media (min-width:1001px){
+  .platecol.is-tight .platecol__tools:not(:has(.tool--sim:not([hidden]))),.platecol.is-sim .platecol__tools:not(:has(.tool--sim:not([hidden]))){padding:0}
+  .platecol.is-tight[data-kind="breathe"] .viewhost{padding:6px}
+}
+@media (min-width:1240px){
+  .c3v__ctl{flex-direction:row;align-items:stretch;background:var(--c3-bg);border-top:1px solid rgba(255,255,255,.08)}
+  .c3v__ctl .c3g{flex:1 1 auto;min-width:0;align-content:center;padding:5px 6px 5px 12px;border-top:0}
+  .c3v__ctl .c3g__row{gap:7px;grid-template-columns:minmax(0,10.8em) minmax(44px,1fr) minmax(0,15.8em)}
+  .c3v__ctl .c3v__bar{flex:none;flex-direction:column;flex-wrap:nowrap;justify-content:center;gap:5px;padding:5px 10px 5px 4px;border-top:0}
+  .c3v__ctl .c3v__b{padding:5px 12px;white-space:nowrap}
+}
+@media (min-width:1240px) and (max-width:1599px){
+  .c3v__ctl .c3g__of{display:none}
+  .c3v__ctl .c3g__row{grid-template-columns:4.6em minmax(44px,1fr) minmax(0,15.8em)}
+}
 .sysv__d3{position:absolute;inset:0}
 
 /* ---------- this lab's step animations: the same frame for each (w-path, w-gases, w-lining, w-activity) ---------- */

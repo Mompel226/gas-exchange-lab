@@ -55,8 +55,8 @@
      air. The pressure is worked out from how fast the volume is changing, so it cannot disagree with the picture. */
   function gauges(cls) {
     var box = h('div', 'c3g' + (cls ? ' ' + cls : ''),
-      '<div class="c3g__row"><span class="c3g__n">Volume of the thorax</span><span class="c3g__bar"><i class="c3g__fill" data-g="v"></i></span><b class="c3g__w" data-w="v"></b></div>' +
-      '<div class="c3g__row"><span class="c3g__n">Pressure in the thorax</span><span class="c3g__bar c3g__bar--p"><span class="c3g__zero" aria-hidden="true"></span><i class="c3g__fill c3g__fill--p" data-g="p"></i></span><b class="c3g__w" data-w="p"></b></div>' +
+      '<div class="c3g__row"><span class="c3g__n">Volume<span class="c3g__of"> of the thorax</span></span><span class="c3g__bar"><i class="c3g__fill" data-g="v"></i></span><b class="c3g__w" data-w="v"></b></div>' +
+      '<div class="c3g__row"><span class="c3g__n">Pressure<span class="c3g__of"> in the thorax</span></span><span class="c3g__bar c3g__bar--p"><span class="c3g__zero" aria-hidden="true"></span><i class="c3g__fill c3g__fill--p" data-g="p"></i></span><b class="c3g__w" data-w="p"></b></div>' +
       '<div class="c3g__row c3g__row--air"><span class="c3g__n">Air</span><span class="c3g__air" data-air=""><i></i><i></i><i></i></span><b class="c3g__w" data-w="a"></b></div>');
     var fv = box.querySelector('[data-g="v"]'), fp = box.querySelector('[data-g="p"]'), air = box.querySelector('[data-air]');
     var wv = box.querySelector('[data-w="v"]'), wp = box.querySelector('[data-w="p"]'), wa = box.querySelector('[data-w="a"]');
@@ -372,14 +372,30 @@
       gLab.innerHTML = K.names(lay, items, narrow, key, null, 14);
     }
     var sp = L.stepper({ steps: K.readerSteps(STEPS, T.R), end: T.end, render: draw, flow: T.flow, stills: K.stillsOf(STEPS, T) });
-    K.mount(S, sp, 'br', [], function (D, nar) {
+    K.mount(S, sp, 'br', [], function (D, nar, room) {
       narrow = nar;
-      var m = K.margins(nar, 22, 18, 130, 130);
-      lay = K.frameOf(svg, bg, model, cr, WIN, false, D, m[0], m[1], m[2], m[3], 13.5);
-      model.removeAttribute('transform');
-      var s = D / lay.vb.w;
-      host.style.left = n1(-lay.vb.x * s) + 'px'; host.style.top = n1(-lay.vb.y * s) + 'px';
-      host.style.width = n1(lay.vb.bw * s) + 'px'; host.style.height = n1(lay.vb.bh * s) + 'px';
+      /* in the picture's column the chest fills the whole frame, the names over its two sides and the key on it (Daniel, 23 Nov 2026: "the 3D space is
+         very short and not really big"). The names used to take half of the width, and left the chest 262 by 279 px on a laptop */
+      var full = !!room && !nar;
+      KEYR.el.classList.toggle('c3k--over', full);
+      if (full) {
+        var w = Math.round(D), band = Math.max(104, Math.round(w * .22));
+        WIN.x1 = w; WIN.y1 = room;
+        svg.setAttribute('viewBox', '0 0 ' + w + ' ' + room);
+        model.removeAttribute('transform');
+        lay = { tall: false, win: WIN, f: 13.5, mL: band + 12, mR: band + 12, inL: band, inR: w - band, inB: 40, vb: { x: 0, y: 0, w: w, h: room, bw: w, bh: room }, to: function (x, y) { return [x, y]; } };
+        host.style.left = '0'; host.style.top = '0'; host.style.width = w + 'px'; host.style.height = room + 'px';
+        KEYR.el.style.top = (room - 32) + 'px';
+      } else {
+        WIN.x1 = 600; WIN.y1 = 640;
+        KEYR.el.style.top = '';
+        var m = K.margins(nar, 22, 18, 130, 130);
+        lay = K.frameOf(svg, bg, model, cr, WIN, false, D, m[0], m[1], m[2], m[3], 13.5);
+        model.removeAttribute('transform');
+        var s = D / lay.vb.w;
+        host.style.left = n1(-lay.vb.x * s) + 'px'; host.style.top = n1(-lay.vb.y * s) + 'px';
+        host.style.width = n1(lay.vb.bw * s) + 'px'; host.style.height = n1(lay.vb.bh * s) + 'px';
+      }
       if (A) { A.resize(); }
     });
     /* the chest loads only when this card is opened */

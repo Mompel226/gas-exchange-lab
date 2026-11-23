@@ -128,7 +128,8 @@ function loadModel(stamp) {
 
 const VIEWS = {
   front: { p: [0, .06, 1], t: [0, .04, 0], d: 9.4 },
-  cut: { p: [0, .05, 1], t: [0, .08, 0], d: 8.6 },
+  /* fit: below this width-to-height the camera stands back, so the chest keeps a clear margin each side for its names in a tall picture */
+  cut: { p: [0, .05, 1], t: [0, .08, 0], d: 8.6, fit: 1.22 },
   side: { p: [-1, .06, .02], t: [0, .04, 0], d: 9.4 },
   turned: { p: [-.62, .16, .77], t: [0, .04, 0], d: 9.6 },
   low: { p: [-.36, -.24, .9], t: [0, -.3, 0], d: 8.2 },
@@ -349,12 +350,15 @@ export async function createChest(host, opts) {
   /* `manual`: a film draws each moment itself (api.now), so nothing here draws it a second time */
   function kick() { dirty = true; if (!manual && !raf && !dead) raf = requestAnimationFrame(draw); }
   controls.addEventListener('change', kick);
+  let named = null;
+  controls.addEventListener('start', () => { named = null; });
   function resize() {
     const r = host.getBoundingClientRect(), w = Math.round(r.width), hh = Math.round(r.height);
     if (!w || !hh || (w === W && hh === H)) return;
     W = w; H = hh; camera.aspect = W / H; camera.updateProjectionMatrix();
     renderer.setSize(W, H, false);
     el.style.width = W + 'px'; el.style.height = H + 'px';
+    if (named && !tween) viewNow(named);      /* the picture changed shape: the view fits it again, unless the reader has turned the chest */
     if (!dead) draw();
   }
   const ro = global().ResizeObserver ? new ResizeObserver(resize) : null;
@@ -362,21 +366,23 @@ export async function createChest(host, opts) {
 
   /* a named view: the camera arrives over `ms`, or at once. Tall or narrow pictures stand further back, so the whole chest fits. */
   let tween = null;
-  function fitDist(d) { const a = camera.aspect || 1; return a < .9 ? d * (.9 / a) * 1.02 : d; }
+  function fitDist(v) { const a = camera.aspect || 1, f = v.fit || .9; return a < f ? v.d * (f / a) * (v.fit ? 1 : 1.02) : v.d; }
   function setCam(p, t) { camera.position.copy(p); controls.target.copy(t); camera.lookAt(t); }
   function viewNow(name) {
+    named = name;
     const v = VIEWS[name] || VIEWS.front;
     const dir = new THREE.Vector3(...v.p).normalize();
     const t = new THREE.Vector3(...v.t);
-    setCam(t.clone().addScaledVector(dir, fitDist(v.d)), t);
+    setCam(t.clone().addScaledVector(dir, fitDist(v)), t);
     controls.update();
   }
   function view(name, ms) {
     const v = VIEWS[name] || VIEWS.front;
+    named = name;
     if (!ms) { tween = null; viewNow(name); kick(); return; }
     const t1 = new THREE.Vector3(...v.t), t0 = controls.target.clone();
     const s0 = new THREE.Spherical().setFromVector3(camera.position.clone().sub(t0));
-    const s1 = new THREE.Spherical().setFromVector3(new THREE.Vector3(...v.p).normalize().multiplyScalar(fitDist(v.d)));
+    const s1 = new THREE.Spherical().setFromVector3(new THREE.Vector3(...v.p).normalize().multiplyScalar(fitDist(v)));
     let dt = s1.theta - s0.theta; if (dt > Math.PI) dt -= 2 * Math.PI; if (dt < -Math.PI) dt += 2 * Math.PI;
     const start = performance.now();
     tween = { start, ms };
@@ -392,10 +398,11 @@ export async function createChest(host, opts) {
   }
   /* a held view for a film: the camera at a blend of two named views, with no timer (any moment can be drawn) */
   function viewBlend(a, b, k) {
+    named = k >= 1 ? b : k <= 0 ? a : null;
     const va = VIEWS[a], vb = VIEWS[b] || va;
     const ta = new THREE.Vector3(...va.t), tb = new THREE.Vector3(...vb.t);
-    const sa = new THREE.Spherical().setFromVector3(new THREE.Vector3(...va.p).normalize().multiplyScalar(fitDist(va.d)));
-    const sb = new THREE.Spherical().setFromVector3(new THREE.Vector3(...vb.p).normalize().multiplyScalar(fitDist(vb.d)));
+    const sa = new THREE.Spherical().setFromVector3(new THREE.Vector3(...va.p).normalize().multiplyScalar(fitDist(va)));
+    const sb = new THREE.Spherical().setFromVector3(new THREE.Vector3(...vb.p).normalize().multiplyScalar(fitDist(vb)));
     let dt = sb.theta - sa.theta; if (dt > Math.PI) dt -= 2 * Math.PI; if (dt < -Math.PI) dt += 2 * Math.PI;
     const e = k * k * (3 - 2 * k), sp = new THREE.Spherical(sa.radius + (sb.radius - sa.radius) * e, sa.phi + (sb.phi - sa.phi) * e, sa.theta + dt * e);
     const t = ta.lerp(tb, e);

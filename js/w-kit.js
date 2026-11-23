@@ -157,7 +157,8 @@
              to: function (x, y) { return tall ? [y - win.y0, x - win.x0] : [x - win.x0, y - win.y0]; } };
   }
   function drawLabels(lay, items, tiny, gap) {
-    var vb = lay.vb, o = { left: -8, right: vb.bw + 8, font: lay.f, top: vb.y + 6, bottom: vb.y + vb.h - 6, gap: gap == null ? 5 : gap };
+    /* names stand in margins beside the drawing; a film that fills its frame (lay.inL, inR, inB) lays them over the frame's two sides */
+    var vb = lay.vb, o = { left: lay.inL != null ? lay.inL : -8, right: lay.inR != null ? lay.inR : vb.bw + 8, font: lay.f, top: vb.y + 6, bottom: vb.y + vb.h - (lay.inB || 6), gap: gap == null ? 5 : gap };
     var out = L.labels(Object.assign({}, o, { items: items.filter(function (q) { return q.side === 'L'; }), width: lay.mL - 26 })) +
               L.labels(Object.assign({}, o, { items: items.filter(function (q) { return q.side === 'R'; }), width: lay.mR - 26 }));
     /* a part smaller than the usual dot (a platelet, a molecule) gets a smaller dot, so it still shows round it */
@@ -228,13 +229,13 @@
       lastD = D; lastN = narrow; lastH = H;
       var d = D;
       S.svg.style.width = ''; S.svg.style.margin = '';
-      setLayout(d, narrow);
+      setLayout(d, narrow, H);
       if (H && S.svg.isConnected) {
         /* narrower, so the names keep their size: the margins are worked out again for the new width */
         for (var i = 0; i < 4; i++) {
           var vb = S.svg.viewBox.baseVal, need = d * vb.height / vb.width;
           if (need <= H + 1) break;
-          d = Math.max(190, d * H / need); setLayout(d, narrow);
+          d = Math.max(190, d * H / need); setLayout(d, narrow, H);
         }
         if (d < D - 1) { S.svg.style.width = n1(d) + 'px'; S.svg.style.margin = '0 auto'; }
       } else S.fig.style.setProperty('--art-h', H ? H + 'px' : 'none');

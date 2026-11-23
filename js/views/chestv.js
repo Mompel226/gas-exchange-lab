@@ -17,7 +17,7 @@
   function still() { return !!(global.matchMedia && global.matchMedia('(prefers-reduced-motion: reduce)').matches); }
 
   /* the names on the chest: ruled level lines from the picture's sides, each ending ON its part (CircLearn.labels) */
-  function namer(stage, topGap) {
+  function namer(stage, topGap, botGap) {
     var svg = document.createElementNS(NS, 'svg'); svg.setAttribute('class', 'c3v__svg'); svg.setAttribute('aria-hidden', 'true');
     stage.appendChild(svg);
     return function draw(A, list) {
@@ -29,7 +29,7 @@
         var p = q.at || A.project(q.g, q.i, false);
         return { id: q.id, text: q.text, x: p.x, y: p.y, side: q.side || (p.x < W / 2 ? 'L' : 'R') };
       });
-      var o = { left: band, right: W - band, font: f, top: topGap || 26, bottom: H - 8, gap: 5 };
+      var o = { left: band, right: W - band, font: f, top: topGap || 26, bottom: H - (botGap || 8), gap: 5 };
       svg.innerHTML = global.CircLearn.labels(Object.assign({}, o, { items: items.filter(function (q) { return q.side === 'L'; }), width: band - 14 })) +
         global.CircLearn.labels(Object.assign({}, o, { items: items.filter(function (q) { return q.side === 'R'; }), width: band - 14 }));
     };
@@ -71,7 +71,7 @@
     var st3 = h('div', 'c3v__stage'), host = h('div', 'c3v__c3'); st3.appendChild(host);
     var hint = h('p', 'c3v__hint', 'Drag to turn. Scroll or pinch to zoom. Press a part to open its card.');
     var bar3 = h('div', 'c3v__bar');
-    d3.appendChild(st3); d3.appendChild(hint); d3.appendChild(bar3); stage.appendChild(d3);
+    d3.appendChild(st3); d3.appendChild(bar3); stage.appendChild(d3);
     var name3 = namer(st3), A = null, loading = false, lit = null, on3 = false;
     /* the layers a reader can take off, from the outside in */
     var LAYERS = [['Ribs', ['rib', 'sternum', 'cartilage']], ['Muscles', ['ext', 'int']], ['Lungs', ['lung']], ['Airways', ['airway']]], shown = { 0: 1, 1: 1, 2: 1, 3: 1 };
@@ -80,6 +80,7 @@
       b.addEventListener('click', function () { shown[i] = shown[i] ? 0 : 1; b.setAttribute('aria-pressed', shown[i] ? 'true' : 'false'); paint(); });
       bar3.appendChild(b);
     });
+    bar3.appendChild(hint);
     function opacityOf(g) {
       var a = 1;
       LAYERS.forEach(function (l, i) { if (l[1].indexOf(g) >= 0 && !shown[i]) a = 0; });
@@ -127,6 +128,7 @@
     root.__chest = function () { return A; };
     function set3(on) {
       on3 = on;
+      api.tight = on ? st3 : null;      /* in 3D the caption and the credit fold under the i on the picture (js/plate.js) */
       d3.hidden = !on;
       b3.setAttribute('aria-pressed', on ? 'true' : 'false');
       if (on) {
@@ -211,17 +213,25 @@
     var marksSvg = document.createElementNS(NS, 'svg'); marksSvg.setAttribute('class', 'c3v__marks'); marksSvg.setAttribute('aria-hidden', 'true'); stage.appendChild(marksSvg);
     var KEY = GC.keyRow(); root.appendChild(KEY.el);
     var MS = GC.muscles(); root.appendChild(MS.el);
-    var G = GC.gauges(); root.appendChild(G.el);
-    var bar = h('div', 'c3v__bar');
+    /* the gauges and the two buttons share one row on a laptop, so the chest keeps the height */
+    var G = GC.gauges(), bar = h('div', 'c3v__bar'), ctl = h('div', 'c3v__ctl');
+    ctl.appendChild(G.el); ctl.appendChild(bar); root.appendChild(ctl);
+    /* on a laptop the key stands on the picture, a small pill at its foot; on a phone it is a row of its own */
+    var keyQ = global.matchMedia ? global.matchMedia('(min-width: 1001px)') : { matches: true };
+    function placeKey() {
+      KEY.el.classList.toggle('c3k--over', keyQ.matches);
+      if (keyQ.matches) stage.appendChild(KEY.el); else root.insertBefore(KEY.el, MS.el);
+    }
+    placeKey();
+    if (keyQ.addEventListener) keyQ.addEventListener('change', placeKey);
     var bIn = btn('c3v__b c3v__b--go', 'Hold to breathe in'), bOut = btn('c3v__b c3v__b--hard', 'Hold to breathe out hard');
     var vWhole = btn('c3v__b', 'Whole chest'), vDome = btn('c3v__b', 'Diaphragm'), vRibs = btn('c3v__b', 'Rib muscles');
     [bIn, bOut].forEach(function (b) { bar.appendChild(b); });
-    root.appendChild(bar);
     /* what to look at: at the top of the picture they change */
     var views = h('div', 'c3v__views');
     [vWhole, vDome, vRibs].forEach(function (b) { views.appendChild(b); });
     stage.appendChild(views);
-    var A = null, AN = null, name = namer(stage, 48), q = 0, d = 0, ci = 0, tq = 0, td = 0, raf = 0, last = 0;
+    var A = null, AN = null, name = namer(stage, 48, 40), q = 0, d = 0, ci = 0, tq = 0, td = 0, raf = 0, last = 0;
     var mode = 'whole', from = 'whole', mk = 1, turned = false, phase = 'rest', custom = null;
     var RATE = 1.15;      /* how fast the chest follows, per second; a breath in takes about two seconds */
     function vol(a, b) { return A ? A.volumeAt(a, b) : (a + b) / 2; }
@@ -320,7 +330,7 @@
     root.__chest = function () { return A; };   /* for tools/pins.mjs */
     G.show(0, 0); KEY.show('whole');
     var api = {
-      el: root, say: 'A real human chest. Hold a button to make the chest breathe', credit: CREDIT_B,
+      el: root, tight: stage, say: 'A real human chest. Hold a button to make the chest breathe', credit: CREDIT_B,
       labels: { diaphragm: 'diaphragm', external: 'external intercostal muscles', volume: 'volume of the thorax', out: 'breathing out', internal: 'internal intercostal muscles' },
       focus: function (part) {
         if (!A) { pending = part; load(); return; }
