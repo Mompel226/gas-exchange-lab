@@ -530,7 +530,8 @@
         b.list.forEach(function (x) {
           var s2 = document.createElement('li');
           if (window.Terms && Terms.teach) Terms.teach(teachHere);
-          s2.innerHTML = M(typeof x === 'object' ? x.text : x);
+          /* `lead`: the few words that say what the line is about, in bold, so that a long box can be scanned */
+          s2.innerHTML = (typeof x === 'object' && x.lead ? '<b class="exam-lead">' + esc(x.lead) + ':</b> ' : '') + M(typeof x === 'object' ? x.text : x);
           if (window.Terms && Terms.teach) Terms.teach(false);
           /* a fact the syllabus words simply, with the fuller truth under it, marked extension (Daniel, 27 Sep: the
              hepatic portal vein "brings blood from the small intestine", but it is the mesenteric vein that does) */

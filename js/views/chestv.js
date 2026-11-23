@@ -3,7 +3,7 @@
 
      system    station 1: Servier's whole breathing system and its alveoli (labelled figures), and the real chest in 3D, which a
                reader can turn and zoom. Opening a card shows that part in the picture that shows it best.
-     breathe   station 5: the chest breathing under the reader's own finger: hold to breathe in, let go to breathe out, hold the
+     breathe   station 6: the chest breathing under the reader's own finger: hold to breathe in, let go to breathe out, hold the
                second button to breathe out hard. The gauges follow what the chest does.
 
    The chest loads only when the picture that holds it is first shown.
@@ -166,7 +166,7 @@
   }
   Views.add('system', system);
 
-  /* ------------------------------------------------------------------ station 5 ------------------------------------ */
+  /* ------------------------------------------------------------------ station 6 ------------------------------------ */
   /* what each card shows: the pose the chest goes to, and the look that shows it best. The diaphragm and the external intercostal
      muscles contract together, so every card of a breath in shows the same whole breath */
   var POSES = {

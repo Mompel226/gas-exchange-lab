@@ -9,6 +9,7 @@
 
    spec: { kind:'figure', parts:[…], names:{ part: 'its name on the picture' }, beyond:{ part: 1 },
            litNames:{ part: 'its name while it is lit' }, together:{ part: 'the part whose card it shares' },
+           onlyLit:{ part: 1 },
            modes:[{ id, name, img, iw, ih, x0, y0, w, h, pts:{ part:[x, y, side?] }, alts:{ part:[[x, y], …] },
                     lights:{ part: 'its shape' }, layers:{ part: 'its own picture' },
                     names, say, alt, credit, cannot:{ part: 'why' }, heads:[{ x, t, y? }], narrow:{ … } }] }
@@ -21,7 +22,8 @@
    bit uncentered"). Its outline comes from js/data/shapes.js (tools/trace-shapes.py cuts it from the drawing; `lights` says
    which shape when the part's id differs), or, on the body, the part is its own picture (`layers`). When a name stands for
    several parts and all of them light, `litNames` gives its plural (memory plural-names). `together`: a name with no
-   card of its own lights, and opens, the card it shares.
+   card of its own lights, and opens, the card it shares. `onlyLit`: a name that stands on the picture only while its card is open, for a part in a closed box
+   beyond the syllabus (the margins are kept for it, so that nothing moves when the box opens).
    ============================================================ */
 (function (global) {
   'use strict';
@@ -42,7 +44,7 @@
 
   function make(spec, ctx) {
     /* a part's name on the picture: the mode's own, then the station's, then its id (each view keeps its own) */
-    var NAMES = spec.names || {}, BEYOND = spec.beyond || {}, WITH = spec.together || {}, PLURAL = spec.litNames || {};
+    var NAMES = spec.names || {}, BEYOND = spec.beyond || {}, WITH = spec.together || {}, PLURAL = spec.litNames || {}, ONLY = spec.onlyLit || {};
     function labelOf(m, p) { return (p === lit && PLURAL[p]) || (m.names && m.names[p]) || NAMES[p] || p; }
     function cardOf(p) { return WITH[p] || p; }
     function shapeOf(m, p) { var s = (global.GasShapes || {})[m.svg || m.img]; return (s && s[(m.lights || {})[p] || p]) || ''; }
@@ -215,7 +217,7 @@
     function draw(M) {
       fit(M);
       var m = M.cur, f = M.font || 40;
-      var items = Object.keys(m.pts).map(function (p) {
+      var items = Object.keys(m.pts).filter(function (p) { return !ONLY[p] || cardOf(p) === lit; }).map(function (p) {
         /* `alts`: other points ON the part, where its name may stand when names crowd (a drawing's are found from the
            drawing itself by the station's master; `off`: a first point not on its part, never used) */
         return { id: p, text: labelOf(m, p), x: m.pts[p][0], y: m.pts[p][1], side: sideOf(M, p), alts: (m.alts || {})[p],

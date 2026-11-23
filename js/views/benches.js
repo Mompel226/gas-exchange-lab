@@ -1,8 +1,8 @@
 /* ============================================================
    views/benches.js — the stations' pictures that are made to be used.
 
-     airsample   station 3: two equal volumes of air as counted dots; press a gas to compare it
-     limebench   station 4: the limewater bench: Breathe in draws air through tube A, Breathe out pushes it through tube B, and each
+     airsample   station 4: two equal volumes of air as counted dots; press a gas to compare it
+     limebench   station 5: the limewater bench: Breathe in draws air through tube A, Breathe out pushes it through tube B, and each
                  tube turns cloudy according to the carbon dioxide that has really passed through it
      reportview  station 8: your report as a page of five parts to press. Empty on purpose: no table, graph or words of the investigation.
    ============================================================ */
@@ -12,7 +12,7 @@
   function h(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
   function still() { return !!(global.matchMedia && global.matchMedia('(prefers-reduced-motion: reduce)').matches); }
 
-  /* ---------------------------------------------------------------- station 3 ------------------------------------- */
+  /* ---------------------------------------------------------------- station 4 ------------------------------------- */
   function airsample(spec, ctx) {
     var G = global.GasDots;
     var root = h('div', 'asv');
@@ -68,7 +68,7 @@
   }
   Views.add('airsample', airsample);
 
-  /* ---------------------------------------------------------------- station 4 ------------------------------------- */
+  /* ---------------------------------------------------------------- station 5 ------------------------------------- */
   /* The bench. On breathing in, air is drawn in through the long tube of A, bubbles up through its limewater, and on to the mouthpiece;
      on breathing out, air goes down the long tube of B and bubbles up through its limewater, out of B's short tube.
      Cloudiness follows the carbon dioxide that has passed: expired air holds 100 times more (0.04 % against 4 %), so B clouds within
