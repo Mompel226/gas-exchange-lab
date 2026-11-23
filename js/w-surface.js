@@ -34,6 +34,7 @@
   }
   function keyOf(S, u, list) {
     var icon = { o2: ['<circle r="4" fill="url(#' + u + 'mo)" stroke="#5A1109" stroke-width=".6"/>', 'oxygen'], co2: ['<circle r="4" fill="url(#' + u + 'mc)" stroke="#0E2F59" stroke-width=".6"/>', 'carbon dioxide'],
+      hb: ['<g transform="scale(.72 .56)"><use href="#' + u + 'rbF"/></g><circle r="2.3" fill="url(#' + u + 'mo)" stroke="#FFF" stroke-width=".7"/>', 'oxygen on haemoglobin'],
       rbc: ['<g transform="scale(.72 .56)"><use href="#' + u + 'rbF"/></g>', 'red blood cell'] };
     var el = h('div', 'gk', list.map(function (k) { return '<span class="gk__i" data-k="' + k + '"><svg viewBox="-5 -5 10 10" aria-hidden="true">' + icon[k][0] + '</svg>' + icon[k][1] + '</span>'; }).join(''));
     S.fig.appendChild(el);
@@ -200,15 +201,21 @@
     for (i = 1; i < layers; i++) o += '<path class="tw__wline" d="M0 ' + (y0 + i * 20) + 'h' + PW + '"/>';
     for (i = 0; i < layers; i++) o += '<ellipse class="df__nuc" cx="' + (58 + (i % 2) * 150 + i * 16) + '" cy="' + (y0 + 10 + i * 20) + '" rx="22" ry="5"/>';
     /* the blood below, moving on */
-    for (i = 0; i < 3; i++) { var cx = ((i * 142 + w * 26) % 426) - 62; o += K.rbc(u, cx, (y1 + PY1) / 2 + (i % 2 ? 22 : -14), clamp((cx + 40) / 320), 6.8, 4.9, 6 * Math.sin(cx / 50 + i)); }
+    function cellOf(c, when) { return { x: ((c * 142 + when * 26) % 426) - 62, y: (y1 + PY1) / 2 + (c % 2 ? 22 : -14) }; }
+    for (i = 0; i < 3; i++) { var cc = cellOf(i, w); o += K.rbc(u, cc.x, cc.y, clamp((cc.x + 40) / 320), 6.8, 4.9, 6 * Math.sin(cc.x / 50 + i)); }
     PAIR.forEach(function (q) { o += F.molSvg([q.x + 8 * Math.sin(w * q.f1 + q.a), q.y + 6 * Math.sin(w * q.f2 + q.b), 1], 'o2', u, 1); });
-    /* oxygen crossing, one molecule after another */
-    var first = Math.max(0, Math.floor((w - t0) / P.every) - 12);
+    /* oxygen crossing, one molecule after another; in the blood each joins the nearest red blood cell and travels on it */
+    var first = Math.max(0, Math.floor((w - t0) / P.every) - Math.ceil(15 / P.every));
     for (i = first; ; i++) {
       var s0 = t0 + i * P.every; if (s0 > w) break;
       var age = w - s0, x = 34 + (i * 97) % (PW - 80), yy;
-      if (age < P.go) { var k = age / P.go; yy = lerp(y0 - 14, y1 + 16, k); o += F.molSvg([x + 3 * Math.sin(k * 9 + i), yy, Math.min(1, k * 5)], 'o2', u, 1); }
-      else { var xx = x + (age - P.go) * 26; if (xx < PW + 8) o += F.molSvg([xx, y1 + 16 + Math.min(1, (age - P.go) / .6) * (14 + (i * 31) % 70), 1], 'o2', u, 1); }
+      if (age < P.go) { var k = age / P.go; yy = lerp(y0 - 14, y1 + 16, k); o += F.molSvg([x + 3 * Math.sin(k * 9 + i), yy, Math.min(1, k * 5)], 'o2', u, 1); continue; }
+      var land = s0 + P.go + .55, join = 0, far = 1e9;
+      for (var j = 0; j < 3; j++) { var dd = Math.abs(cellOf(j, land).x - x - 8); if (dd < far) { far = dd; join = j; } }
+      var now = cellOf(join, w), then = cellOf(join, land), th = i * 2.4, tx = now.x + 30 * Math.cos(th), ty = now.y + 21 * Math.sin(th);
+      if ((w - land) * 26 + then.x >= 364) continue;        /* its cell has left the panel */
+      if (w < land) { var kk = ease((w - s0 - P.go) / .55); o += F.molSvg([lerp(x, tx, kk), lerp(y1 + 16, ty, kk), 1, 0], 'o2', u, 1); }
+      else if (tx < PW + 8) o += F.molSvg([tx, ty, 1, 1], 'o2', u, 1);
     }
     o += '</g>';
     /* how many have crossed since the comparison began */
@@ -221,7 +228,7 @@
     var u = 'tw' + (++UID) + '-', title = spec.title || TW_TITLE;
     var S = K.shell(spec, 'tw', title, 'The two thin walls between the air and the blood, the short diffusion distance across them, then a thin and a thick surface side by side with oxygen crossing each.', []);
     var T = stage(S, 'tw', u, '<clipPath id="' + u + 'pan"><rect x="0" y="' + PY0 + '" width="' + PW + '" height="' + (PY1 - PY0) + '" rx="8"/></clipPath>');
-    var showKey = keyOf(S, u, ['o2', 'rbc']);
+    var showKey = keyOf(S, u, ['o2', 'hb', 'rbc']);
     var TL = K.timeline(TW_M, null, TW_MOTION, title), R = TL.R, clock = TL.clock, worldAt = function (m) { return m; }, read0 = 0;
     function zoomAt(t) { return lerp(1, 1.65, ease(seg(t, 4.3, 6.2))); }
     /* the point of the section at the middle of the picture: its own middle at first, the two walls once it has closed in */
@@ -263,7 +270,7 @@
         PAN.forEach(function (P) { o += panelSvg(P, Math.max(wt - read0, 10.6), 10.6, u, pa); });
       }
       T.art.innerHTML = o;
-      showKey('o2', t >= 9.8); showKey('rbc', true);
+      showKey('o2', t >= 9.8); showKey('hb', t >= 9.8); showKey('rbc', true);
       names(T, itemsAt, tt, still);
     }
     var sp = L.stepper({ steps: K.readerSteps(TW_STEPS, R), end: TL.end, render: draw, flow: TL.flow, stills: K.stillsOf(TW_STEPS, TL) });

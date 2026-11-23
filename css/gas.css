@@ -480,8 +480,7 @@ html[data-lab-tab="do"] .viewcol #viewHost .lb{display:none}
 .ap__read,.df__read,.ac__read,.lg__read,.av__read,.sa__read,.tw__read,.fa__read{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 6px}
 .ap__read:empty,.df__read:empty,.ac__read:empty,.lg__read:empty,.av__read:empty,.sa__read:empty,.tw__read:empty,.fa__read:empty{display:none}
 .ap__air{fill:#F2F5F7;stroke:#2B3A48;stroke-width:1.6}
-.ap__band--thin{stroke-width:11}
-.ap__band{fill:none;stroke:#4FC3F7;stroke-opacity:.38;stroke-width:26;stroke-linecap:round;stroke-linejoin:round}
+.ap__veil{fill:var(--on-photo-veil);pointer-events:none}
 .ap__winbg{fill:#FFF}
 .ap__winring{fill:none;stroke:#0B6A8C;stroke-width:6}
 
