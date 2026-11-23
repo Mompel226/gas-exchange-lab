@@ -40,14 +40,15 @@
   var CREDIT_B = 'BodyParts3D, The Database Center for Life Science, CC BY-SA 2.1 JP';
   var FLAT = {
     names: { lungs: 'lung', larynx: 'larynx', trachea: 'trachea', cartilage: 'rings of cartilage', bronchi: 'bronchus', bronchioles: 'bronchioles', alveoli: 'alveoli', caps: 'capillaries', nose: 'nose', mouth: 'mouth' },
+    litNames: { lungs: 'lungs', bronchi: 'bronchi' },
     modes: [
       { id: 'whole', name: 'The whole system', img: 'sv-system.png', iw: 1248, ih: 1594, w: 1248, h: 1594,
         alt: 'A drawing of a person from the head to the waist with the airways and lungs shown: nose, mouth, larynx, trachea, two bronchi, and bronchioles branching inside each lung.',
-        pts: { nose: [430, 268, 'L'], mouth: [400, 432, 'L'], larynx: [566, 522, 'L'], cartilage: [588, 790, 'L'], lungs: [360, 1010, 'L'], trachea: [616, 690, 'R'], bronchi: [684, 1002, 'R'], bronchioles: [846, 1150, 'R'] },
+        pts: { nose: [430, 268, 'L'], mouth: [400, 432, 'L'], larynx: [566, 522, 'L'], cartilage: [592, 794, 'L'], lungs: [360, 1010, 'L'], trachea: [616, 690, 'R'], bronchi: [684, 1002, 'R'], bronchioles: [866, 1140, 'R'] },
         say: 'This is how an exam diagram shows the breathing system', credit: CREDIT_S },
       { id: 'alv', name: 'The alveoli', img: 'sv-alveoli.svg', iw: 262, ih: 380, w: 262, h: 380,
         alt: 'A drawing of a bronchiole that branches and ends in clusters of round air sacs, the alveoli. One cluster is covered with a network of red and blue capillaries.',
-        pts: { bronchioles: [58, 108, 'L'], alveoli: [84, 310, 'L'], caps: [200, 322, 'R'] },
+        pts: { bronchioles: [58, 108, 'L'], alveoli: [84, 310, 'L'], caps: [202, 326.5, 'R'] },
         say: 'A bronchiole ends in alveoli. Capillaries surround them: one cluster is drawn with its capillaries', credit: CREDIT_S }
     ]
   };

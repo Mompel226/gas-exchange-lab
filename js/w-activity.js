@@ -40,7 +40,7 @@
   var ROUTE = VEIN.concat(LUNG, ARTERY);
   var STEPS = [
     { t: 0, h: 'Active muscles respire more', p: [['ig', 'During physical activity the **muscles contract more**, so the muscles need more energy. The muscles **respire** more to release this energy, and the muscles **produce more carbon dioxide**.']] },
-    { t: 4.6, h: 'More carbon dioxide in the blood', p: [['ig', 'The carbon dioxide enters the blood. The **carbon dioxide concentration in the blood increases**, and the blood carries it round the body.']] },
+    { t: 4.6, h: 'More carbon dioxide in the blood', p: [['ig', 'The carbon dioxide diffuses into the blood. The **carbon dioxide concentration in the blood increases**, and the blood carries it round the body.']] },
     { t: 9.8, h: 'The brain detects the carbon dioxide', p: [['ig', 'The increased carbon dioxide concentration in the blood is **detected by the brain**.']] },
     { t: 13, h: 'Impulses to the breathing muscles', p: [['ig', 'The brain sends more electrical signals along nerves to the **diaphragm** and the **intercostal muscles**. These signals are **impulses**. The diaphragm and the intercostal muscles contract **faster** and **more strongly**.']] },
     { t: 18, h: 'A greater rate and depth of breathing', p: [['ig', 'The **rate** and the **depth** of breathing **increase**. More carbon dioxide is removed from the blood, and more oxygen is supplied to the muscles.']] }

@@ -447,11 +447,23 @@
     off.old.className = off.beyond.className = 'exam-list exam-list--off';
     function offOf(b, i) {
       if (st.past && st.past.exam && st.past.exam[i] != null) return 'old';
-      return typeof b === 'object' && b.ext ? 'beyond' : null;
+      return typeof b === 'object' && b.ext && !b.here ? 'beyond' : null;
+    }
+    /* a box marked `here` is beyond the syllabus but stands right after its sentence (`near`), not in the card below (Daniel, 23 Nov 2026:
+       "a gray box in the bronchi section"; "just below it, the test for carbon dioxide, another collapsible"). It keeps its own index. */
+    function examInOrder(all) {
+      var out = [];
+      all.forEach(function (b, i) {
+        if (b && b.here) return;
+        out.push([b, i]);
+        all.forEach(function (x, j) { if (x && x.here && x.near === i) out.push([x, j]); });
+      });
+      return out;
     }
     var partName = null;
 
-    (st.learn.exam || []).forEach(function (b, i) {
+    examInOrder(st.learn.exam || []).forEach(function (pair) {
+      var b = pair[0], i = pair[1];
       var offK = offOf(b, i);
       /* sentences that belong to a named part — "Setting it up" — sit together in their own block */
       var part = (typeof b === 'object' && b.part) || null;
@@ -485,7 +497,7 @@
       if (pe != null) badge = pastBadge(pe);
       else if (offK === 'beyond') badge = '';
       /* the sentences a student reads, not the card below: the only place a word takes you to another station */
-      var teachHere = !offK;
+      var teachHere = !offK && !(typeof b === 'object' && b.here);
       if (typeof b === 'object' && b.head && window.Terms && Terms.freshCard) Terms.freshCard();   /* a card is read on its own */
       if (window.Terms && Terms.teach) Terms.teach(teachHere);
       li.innerHTML = badge + M(txt);
@@ -523,6 +535,7 @@
           /* a fact the syllabus words simply, with the fuller truth under it, marked extension (Daniel, 27 Sep: the
              hepatic portal vein "brings blood from the small intestine", but it is the mesenteric vein that does) */
           if (typeof x === 'object' && x.note) s2.insertAdjacentHTML('beforeend', '<span class="exam-inote"><span class="sup sup--ext">extension</span> ' + M(x.note) + '</span>');
+          if (typeof x === 'object' && x.eq) s2.insertAdjacentHTML('beforeend', '<span class="exam-eq">' + esc(x.eq) + '</span>');
           if (typeof x === 'object' && x.group) s2.setAttribute('data-group', [].concat(x.group).join(' '));
           ol.appendChild(s2);
         });
@@ -585,6 +598,10 @@
          (Daniel, 7 Oct 2026: less text beside the picture, one piece open at a time; memory explore-dont-scroll).
          Opening a card shows its part in the picture; a part pressed in the picture opens its card (openGroup). */
       if (typeof b === 'object' && b.head) makeCard(li, b.head);
+      if (typeof b === 'object' && b.here) {
+        li.classList.add('xcard--beyond');
+        li.querySelector('.xcard__t').insertAdjacentHTML('afterend', '<span class="tier tier--ext">beyond the syllabus</span>');
+      }
       /* a film marked to come first stands before its sentence */
       if (!offK) filmsAt(widgets, 'before', i).forEach(function (g) { list.appendChild(filmCard(g)); });
       if (offK) offAt[offK].push({ k: typeof b === 'object' && b.near != null ? b.near + 0.5 : i, li: li });
@@ -691,7 +708,12 @@
                   : g2.sup ? ' <span class="tier tier--sup tip" tabindex="0" data-tip="Supplement — Extended papers (2 and 4) only">Supplement</span>' : '';
           return '<div class="kw kw--flip" role="button" tabindex="0" aria-expanded="false" data-kwcard="' + esc(w.term.toLowerCase()) + '">' +
                  '<dt>' + M(w.term) + numberOf(g2) + tag + (window.Say ? window.Say.html(w.term) : '') + '</dt><p class="kw__ask">Do you know it? Tap to check</p><dd>' + M(w.def) + '</dd></div>';
-        }).join('') + '</dl>';
+        }).join('') + '</dl>' +
+        /* the same things in the words Cambridge's papers also use: to recognise in a question, and whether to write them (Daniel, 23 Nov 2026) */
+        ((st.alsoWords || []).length ? '<div class="kw-also"><div class="kw-also__h">The same thing in other words</div><p class="kw-also__hint">You may read these words in an exam question.</p><ul class="kw-also__l">' +
+          st.alsoWords.map(function (a) {
+            return '<li><b>' + esc(a.word) + '</b><span class="kw-also__is"> = ' + esc(a.is) + '</span>' + (a.write ? '' : '<span class="kw-also__no">in your answer, write ' + esc(a.instead) + '</span>') + '</li>';
+          }).join('') + '</ul></div>' : '');
       Array.prototype.forEach.call(k.querySelectorAll('.kw--flip'), function (c) {
         var turn = function () { var o = c.classList.toggle('is-open'); c.setAttribute('aria-expanded', o ? 'true' : 'false'); };
         c.addEventListener('click', function (e) { if (e.target.closest('[data-peek],[data-jump],[data-gloss],[data-stat],[data-kw],.tip')) return; turn(); });

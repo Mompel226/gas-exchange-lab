@@ -104,6 +104,44 @@
       });
     };
   }
+  /* A film whose world never stands still: the blood keeps flowing and the air keeps moving while a step waits for Next step (Daniel, 23 Nov
+     2026: "make sure that flow is constantly visual. Otherwise, students might not wait till the last step, and then they might think
+     everything's static"). A step's picture is still a function of the reader's time; this returns a second clock, which runs on while
+     the reader reads. With Reduce motion, or for a tool that seeks one moment (box.__seek, flow.model), it stands still. */
+  function world(S, sp, repaint) {
+    var extra = 0, last = null, seen = false;
+    function shown() {
+      if (S.box.hidden || document.hidden) return false;
+      var c = S.box.closest ? S.box.closest('.xcard') : null;
+      return (!c || c.classList.contains('is-open')) && S.svg.getBoundingClientRect().width > 0;
+    }
+    function tick(ts) {
+      if (S.box.isConnected) seen = true; else if (seen) return;
+      global.requestAnimationFrame(tick);
+      var dt = last == null ? 0 : Math.min(.1, (ts - last) / 1000); last = ts;
+      if (!dt || sp.playing() || S.box.__seeking || (sp.flow && sp.flow.model != null) || sp.isStill() || sp.time() <= 0 || !shown()) return;
+      extra += dt * PACE;
+      repaint();
+    }
+    global.requestAnimationFrame(tick);
+    return function (t) { return t + extra; };
+  }
+  /* A red blood cell as the Circulation Lab draws it (w-chd.js): a biconcave disc, about 7.5 µm across, its thin centre a paler hollow, lit from
+     the top left. rb = rich in oxygen, rbD = less oxygen; k blends from one to the other as the cell loads oxygen. */
+  function rbcDefs(u) {
+    function set(k, c) {
+      return '<radialGradient id="' + u + 'rb' + k + 'o" cx=".4" cy=".36" r=".72"><stop offset="0" stop-color="' + c[0] + '"/><stop offset=".56" stop-color="' + c[1] + '"/><stop offset=".86" stop-color="' + c[2] + '"/><stop offset="1" stop-color="' + c[3] + '"/></radialGradient>' +
+        '<linearGradient id="' + u + 'rb' + k + 'i" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="' + c[3] + '"/><stop offset=".55" stop-color="' + c[2] + '"/><stop offset="1" stop-color="' + c[0] + '"/></linearGradient>' +
+        '<g id="' + u + 'rb' + k + 'F"><circle r="7" fill="url(#' + u + 'rb' + k + 'o)" stroke="' + c[4] + '" stroke-width="1.2" vector-effect="non-scaling-stroke"/>' +
+        '<circle r="3.5" fill="url(#' + u + 'rb' + k + 'i)" opacity=".85"/><circle r="3.5" fill="none" stroke="' + c[2] + '" stroke-width="1" stroke-opacity=".55" vector-effect="non-scaling-stroke"/></g>';
+    }
+    return set('', ['#FF9C8C', '#E5483F', '#BC262D', '#8E1A21', '#5E0F15']) + set('D', ['#B77684', '#8E4453', '#6E2E3D', '#4F1E2B', '#35121C']);
+  }
+  function rbc(u, x, y, k, sx, sy, rot) {
+    var o = '<g transform="translate(' + n1(x) + ' ' + n1(y) + ')' + (rot ? ' rotate(' + n1(rot) + ')' : '') + ' scale(' + sx + ' ' + sy + ')"><use href="#' + u + 'rbDF"/>';
+    if (k > .01) o += '<use href="#' + u + 'rbF"' + (k < .99 ? ' opacity="' + n1(k * 100) / 100 + '"' : '') + '/>';
+    return o + '</g>';
+  }
   function readerSteps(steps, R) { return steps.map(function (s, i) { var o = {}; for (var k in s) o[k] = s[k]; o.t = R[i]; return o; }); }
 
   /* px: the size the names are drawn at on screen (13 by default; this lab's animations ask for 14.5) */
@@ -209,7 +247,7 @@
       onPlace: function (inColumn) { packT.hidden = !inColumn; S.box.classList.toggle(cls + '--staged', inColumn); sp.compact(inColumn); lastD = 0; fit(); } }) : null;
     S.box.__onMove = function () { if (stg) stg.mount(); };
     S.box.__onReset = function () { sp.stop(); if (ro) ro.disconnect(); if (stg) stg.detach(); };
-    S.box.__seek = function (t) { fit(); return sp.seek(t); };
+    S.box.__seek = function (t) { S.box.__seeking = true; fit(); return sp.seek(t); };
     /* Play all's own clock and end, for the tool that checks the step bar (tools/bands.mjs) */
     S.box.__flow = sp.flow; S.box.__playEnd = sp.end;
     /* in a card, the animation plays all its steps as soon as its card opens (Daniel, 4 Nov 2026: "as soon as you open
@@ -239,7 +277,7 @@
   }
 
 
-  global.WKit = { pinKey: pinKey, names: names, margins: margins, n1: n1, seg: seg, ease: ease, clamp01: clamp01, lerp: lerp, len: len, rng: rng, fitType: fitType,
+  global.WKit = { world: world, rbcDefs: rbcDefs, rbc: rbc, pinKey: pinKey, names: names, margins: margins, n1: n1, seg: seg, ease: ease, clamp01: clamp01, lerp: lerp, len: len, rng: rng, fitType: fitType,
                   timeline: timeline, readerSteps: readerSteps, stillsOf: stillsOf, itemsOf: itemsOf, frameOf: frameOf, drawLabels: drawLabels, shell: shell,
                   mount: mount, NS: NS };
 })(window);

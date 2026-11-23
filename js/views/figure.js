@@ -8,12 +8,20 @@
    reason (`cannot`).
 
    spec: { kind:'figure', parts:[…], names:{ part: 'its name on the picture' }, beyond:{ part: 1 },
-           modes:[{ id, name, img, iw, ih, x0, y0, w, h, pts:{ part:[x, y, side?, r?] }, alts:{ part:[[x, y], …] },
+           litNames:{ part: 'its name while it is lit' }, together:{ part: 'the part whose card it shares' },
+           modes:[{ id, name, img, iw, ih, x0, y0, w, h, pts:{ part:[x, y, side?] }, alts:{ part:[[x, y], …] },
+                    lights:{ part: 'its shape' }, layers:{ part: 'its own picture' },
                     names, say, alt, credit, cannot:{ part: 'why' }, heads:[{ x, t, y? }], narrow:{ … } }] }
    `img` is a file in assets/photos: a photograph or one of the lab's own drawings (an SVG). Points are in the picture's
    own pixels or viewBox units. `alts` are other points ON a part, where its name may stand when names crowd, so every
    line stays level; `beyond` names a part beyond 0610, left out first on a phone too narrow for every name.
    `narrow` is the same picture arranged for a stage under 520 px.
+
+   A lit part is the part itself, never a round spot near it (Daniel, 23 Nov 2026: "only one lung is highlighted and it's a
+   bit uncentered"). Its outline comes from js/data/shapes.js (tools/trace-shapes.py cuts it from the drawing; `lights` says
+   which shape when the part's id differs), or, on the body, the part is its own picture (`layers`). When a name stands for
+   several parts and all of them light, `litNames` gives its plural (memory plural-names). `together`: a name with no
+   card of its own lights, and opens, the card it shares.
    ============================================================ */
 (function (global) {
   'use strict';
@@ -34,8 +42,10 @@
 
   function make(spec, ctx) {
     /* a part's name on the picture: the mode's own, then the station's, then its id (each view keeps its own) */
-    var NAMES = spec.names || {}, BEYOND = spec.beyond || {};
-    function labelOf(m, p) { return (m.names && m.names[p]) || NAMES[p] || p; }
+    var NAMES = spec.names || {}, BEYOND = spec.beyond || {}, WITH = spec.together || {}, PLURAL = spec.litNames || {};
+    function labelOf(m, p) { return (p === lit && PLURAL[p]) || (m.names && m.names[p]) || NAMES[p] || p; }
+    function cardOf(p) { return WITH[p] || p; }
+    function shapeOf(m, p) { var s = (global.GasShapes || {})[m.svg || m.img]; return (s && s[(m.lights || {})[p] || p]) || ''; }
     var root = h('div', 'cellv');
     var bar = h('div', 'vbar cellv__bar');
     bar.setAttribute('role', 'group'); bar.setAttribute('aria-label', 'Ways of seeing this picture');
@@ -61,11 +71,9 @@
       bar.appendChild(b);
       var svg = el('svg', { class: 'cellv__svg', role: 'img', 'aria-label': m.alt || m.name });
       var defs = el('defs', {}, svg);
-      var f = el('filter', { id: uid + 'f' + k, x: '-50%', y: '-50%', width: '200%', height: '200%' }, defs);
-      el('feGaussianBlur', { stdDeviation: String(Math.max(m.w, m.h) / 40) }, f);
       var mask = el('mask', { id: uid + 'm' + k, maskUnits: 'userSpaceOnUse', x: m.x0 || 0, y: m.y0 || 0, width: m.w, height: m.h }, defs);
       el('rect', { x: m.x0 || 0, y: m.y0 || 0, width: m.w, height: m.h, fill: '#fff' }, mask);
-      var hole = el('ellipse', { cx: 0, cy: 0, rx: 0, ry: 0, fill: '#000', filter: 'url(#' + uid + 'f' + k + ')' }, mask);
+      var hole = el('path', { d: '', fill: '#000', 'fill-rule': 'evenodd' }, mask);
       /* the picture at its full size, CLIPPED to the crop x0, y0, w, h (a drawing's own viewBox units): without the clip
          the rest of the photograph shows in the label margins and above and below the crop (8 Oct 2026 review) */
       var clip = el('clipPath', { id: uid + 'c' + k }, defs);
@@ -75,11 +83,16 @@
       else img = el('image', { href: 'assets/photos/' + (m.svg || m.img), x: 0, y: 0, width: m.iw || m.w, height: m.ih || m.h, preserveAspectRatio: 'none',
         'clip-path': 'url(#' + uid + 'c' + k + ')' }, svg);
       var veil = el('rect', { x: m.x0 || 0, y: m.y0 || 0, width: m.w, height: m.h, class: 'cellv__veil', mask: 'url(#' + uid + 'm' + k + ')' }, svg);
+      var layers = {};
+      Object.keys(m.layers || {}).forEach(function (p) {
+        layers[p] = el('image', { class: 'cellv__layer', href: 'assets/photos/' + m.layers[p], x: 0, y: 0, width: m.iw || m.w, height: m.ih || m.h,
+          preserveAspectRatio: 'none', 'clip-path': 'url(#' + uid + 'c' + k + ')' }, svg);
+      });
       var labG = el('g', {}, svg);
       svg.style.display = k === 0 ? '' : 'none';
       stage.appendChild(svg);
-      return { spec: m, cur: m, narrowSpec: m.narrow ? Object.assign({}, m, m.narrow) : null, btn: b, svg: svg, labG: labG, hole: hole, veil: veil,
-        img: img, clipR: clipR, mask: mask, maskR: mask.firstChild, blur: f.firstChild, font: 0 };
+      return { spec: m, cur: m, narrowSpec: m.narrow ? Object.assign({}, m, m.narrow) : null, btn: b, svg: svg, labG: labG, hole: hole, veil: veil, layers: layers,
+        img: img, clipR: clipR, mask: mask, maskR: mask.firstChild, font: 0 };
     });
     /* the arrangement of this picture for the stage's width; swapped in place when it changes */
     function variant(M, r) {
@@ -92,7 +105,6 @@
         M.img.setAttribute('width', m.iw || m.w); M.img.setAttribute('height', m.ih || m.h);
       }
       [M.clipR, M.mask, M.maskR, M.veil].forEach(function (e) { Object.keys(box).forEach(function (a) { e.setAttribute(a, box[a]); }); });
-      M.blur.setAttribute('stdDeviation', String(Math.max(m.w, m.h) / 40));
       M.svg.setAttribute('aria-label', m.alt || m.name);
     }
 
@@ -207,7 +219,7 @@
         /* `alts`: other points ON the part, where its name may stand when names crowd (a drawing's are found from the
            drawing itself by the station's master; `off`: a first point not on its part, never used) */
         return { id: p, text: labelOf(m, p), x: m.pts[p][0], y: m.pts[p][1], side: sideOf(M, p), alts: (m.alts || {})[p],
-          off: (m.off || []).indexOf(p) >= 0, opt: !!BEYOND[p], cls: lit === p ? 'is-lit' : (lit ? 'is-dim' : '') };
+          off: (m.off || []).indexOf(p) >= 0, opt: !!BEYOND[p], cls: lit ? (cardOf(p) === lit ? 'is-lit' : 'is-dim') : '' };
       });
       if (M.pins) {
         var pl = global.CircLearn.pinLabels({ items: items, left: (m.x0 || 0) - 4, right: (m.x0 || 0) + m.w + 4, font: f, top: m.y0 || 0, bottom: (m.y0 || 0) + m.h, gap: f * 0.25 });
@@ -225,15 +237,14 @@
         var k = g.getAttribute('data-lab');
         g.setAttribute('role', 'button'); g.setAttribute('tabindex', '0');
         g.setAttribute('aria-label', items.filter(function (i) { return i.id === k; })[0].text + ': open its card');
-        g.addEventListener('click', function () { ctx.pick(k); });
-        g.addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); ctx.pick(k); } });
+        g.addEventListener('click', function () { ctx.pick(cardOf(k)); });
+        g.addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); ctx.pick(cardOf(k)); } });
       });
-      var pt = lit && m.pts[lit];
-      if (pt) {
-        var rad = pt[3] || Math.max(m.w, m.h) / 9;
-        M.hole.setAttribute('cx', pt[0]); M.hole.setAttribute('cy', pt[1]); M.hole.setAttribute('rx', rad); M.hole.setAttribute('ry', rad);
-        M.veil.classList.add('is-on');
-      } else M.veil.classList.remove('is-on');
+      /* the part itself: its outline, or its own picture over the darkened one */
+      var shape = lit ? shapeOf(m, lit) : '';
+      M.hole.setAttribute('d', shape);
+      Object.keys(M.layers).forEach(function (p) { M.layers[p].classList.toggle('is-on', p === lit); });
+      M.veil.classList.toggle('is-on', !!(shape || (lit && M.layers[lit])));
     }
     function show(k, why) {
       cur = k;
@@ -249,7 +260,8 @@
       el: root, say: modes[0].spec.say, credit: modes[0].spec.credit,
       labels: (function () { var o = {}; (spec.parts || []).forEach(function (p) { o[p] = NAMES[p] || p; }); return o; })(),
       focus: function (part) {
-        lit = part || null;
+        part = part ? cardOf(part) : null;
+        lit = part;
         var M = modes[cur];
         if (!part || M.spec.pts[part]) { show(cur, null); return; }
         /* this way of seeing cannot show it: change to the first that can, and say why */

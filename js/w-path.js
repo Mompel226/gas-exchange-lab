@@ -4,7 +4,9 @@
 
    Every path below is traced on the drawing itself, inside its airways (measured on a grid of the drawing, 21 Nov 2026), so the
    air never crosses a wall. The front of the air reaches each part in its own step; the dots behind it follow.
-   The last step opens a window at the end of a bronchiole, growing from that place, onto Servier's alveoli and capillaries.
+   The last step opens a window at the end of a bronchiole, growing from that place, onto Servier's alveoli and capillaries. The air
+   goes down the bronchiole INTO the cluster that has its capillaries drawn (Daniel, 23 Nov 2026: "not the top one"), each bead to one
+   alveolus. The capillaries are drawn over the beads, because they lie on the outside of the alveoli and the air is inside.
    SOURCES: syllabus 0610 2026–28 11.1.2, 11.1.7; order of parts as credited in 0610/33/O/N/23 Q4(a) and 0610/31/O/N/24 Q5(b).
    ============================================================ */
 (function (global) {
@@ -73,7 +75,7 @@
     { t: 19, h: 'The alveoli', p: [['ig', 'Each bronchiole ends in tiny air sacs, the **alveoli**. A network of **capillaries** surrounds them. Here, gases are exchanged with the blood.']] }
   ];
   var M = [0, 4, 7.4, 11, 14.4, 19, 25];
-  var MOTION = { 'Follow a breath of air': [3.8, 3.2, 3.4, 3.2, 4.2, 5.5] };
+  var MOTION = { 'Follow a breath of air': [3.8, 3.2, 3.4, 3.2, 4.2, 6] };
   /* how far the front of the air has come: 0 at the nostril, 1 at the end of the first leg, and so on */
   function frontAt(t) {
     /* leg 0 and the throat in step 1 */
@@ -91,10 +93,16 @@
     return [p[0] + R.off[0] * Math.min(1, g), p[1] + R.off[1] * Math.min(1, g)];
   }
   /* the part of the airway being named in each step, as a soft band along it */
-  var BANDS = [[NOSE, MOUTH, THROAT], [LARYNX], [TRACHEA], BR, TIPS, []];
+  var THIN = [3, 1, 0, 1, 2, 1, 1, 3, 1, 0, 0, 1, 1, 1];        /* each branch from where it has become a bronchiole: its first part is still a wide bronchus */
+  var BANDS = [[NOSE, MOUTH, THROAT], [LARYNX], [TRACHEA], BR, TIPS.map(function (P, i) { return P.slice(THIN[i]); }), []];
   function band(P) { return 'M' + P.map(function (p) { return n1(p[0]) + ' ' + n1(p[1]); }).join(' L'); }
   /* the window onto the alveoli: at the end of a bronchiole, growing out of it */
   var WC = { x: 800, y: 1120, r: 214 }, AT = { x: 926, y: 1254 };
+  /* the drawing in the window: its point (205, 318), the middle of the cluster with capillaries, at the window's middle, 2.3 times larger */
+  var WK = 2.3, WX = WC.x - 205 * WK, WY = WC.y - 318 * WK;
+  /* the way in, along the bronchiole, then the middle of each alveolus of that cluster (measured from the drawing's own paths) */
+  var INTO = [[138, 238], [150, 260], [160, 276]];
+  var SACS = [[197.4, 309.1], [218.1, 326], [199.9, 339.3], [224.5, 305.2], [198.9, 282.5], [165.1, 327.3], [215.4, 289.7], [211.9, 356.3], [236, 333.4], [176.2, 309.9], [182.5, 330.7], [180.8, 289.5], [163.9, 302.2], [236.2, 293.5]];
 
   function labelsAt(t) {
     var it = [];
@@ -105,7 +113,7 @@
     if (t >= 7.4 && t < 11) { put('trachea', 'trachea', 616, 760, 'R'); put('rings', 'rings of cartilage', 588, 800, 'L'); }
     if (t >= 11 && t < 14.4) { put('br', 'bronchus', 690, 1012, 'R'); put('br2', 'bronchus', 556, 996, 'L'); }
     if (t >= 14.4 && t < 19) { put('bl', 'bronchioles', 856, 1132, 'R'); put('bl2', 'bronchioles', 417, 1132, 'L'); }
-    if (t >= 21.2) { put('alv', 'alveoli', WC.x + 40, WC.y - 170, 'R'); put('cap', 'capillaries', WC.x + 95, WC.y + 50, 'R'); }
+    if (t >= 21.2) { put('alv', 'alveoli', WX + 224.5 * WK, WY + 305.2 * WK, 'R'); put('cap', 'capillaries', WX + 227 * WK, WY + 349 * WK, 'R'); }
     return it;
   }
 
@@ -115,7 +123,8 @@
     var svg = S.svg, NSV = K.NS;
     var defs = document.createElementNS(NSV, 'defs');
     defs.innerHTML = '<clipPath id="apClip"><rect x="' + WIN.x0 + '" y="' + WIN.y0 + '" width="' + (WIN.x1 - WIN.x0) + '" height="' + (WIN.y1 - WIN.y0) + '" rx="14"/></clipPath>' +
-      '<clipPath id="apWin"><circle id="apWinC" cx="' + WC.x + '" cy="' + WC.y + '" r="1"/></clipPath>';
+      '<clipPath id="apWin"><circle id="apWinC" cx="' + WC.x + '" cy="' + WC.y + '" r="1"/></clipPath>' +
+      '<clipPath id="apCaps"><path clip-rule="evenodd" transform="translate(' + WX + ' ' + WY + ') scale(' + WK + ')" d="' + (((global.GasShapes || {})['sv-alveoli.svg'] || {}).caps || '') + '"/></clipPath>';
     svg.appendChild(defs);
     var winC = defs.querySelector('#apWinC');
     var bg = document.createElementNS(NSV, 'rect'); bg.setAttribute('class', 'ap__bg'); svg.appendChild(bg);
@@ -125,10 +134,11 @@
     model.appendChild(base);
     var live = document.createElementNS(NSV, 'g'); live.setAttribute('clip-path', 'url(#apClip)'); model.appendChild(live);
     var winG = document.createElementNS(NSV, 'g'); winG.setAttribute('clip-path', 'url(#apWin)'); winG.style.display = 'none';
-    winG.innerHTML = '<circle cx="' + WC.x + '" cy="' + WC.y + '" r="' + WC.r + '" class="ap__winbg"/><image href="assets/photos/sv-alveoli.svg" x="' + (WC.x - 205 * 2.3) + '" y="' + (WC.y - 318 * 2.3) + '" width="' + 262 * 2.3 + '" height="' + 380 * 2.3 + '"/>';
+    winG.innerHTML = '<circle cx="' + WC.x + '" cy="' + WC.y + '" r="' + WC.r + '" class="ap__winbg"/><image href="assets/photos/sv-alveoli.svg" x="' + WX + '" y="' + WY + '" width="' + 262 * WK + '" height="' + 380 * WK + '"/><g class="ap__wair"></g>' +
+      '<image clip-path="url(#apCaps)" href="assets/photos/sv-alveoli.svg" x="' + WX + '" y="' + WY + '" width="' + 262 * WK + '" height="' + 380 * WK + '"/>';
     model.appendChild(winG);
     var winRing = document.createElementNS(NSV, 'circle'); winRing.setAttribute('class', 'ap__winring'); model.appendChild(winRing);
-    var winAir = document.createElementNS(NSV, 'g'); model.appendChild(winAir);
+    var winAir = winG.querySelector('.ap__wair');
     var cr = document.createElementNS(NSV, 'rect');
     var gLab = document.createElementNS(NSV, 'g'); svg.appendChild(gLab);
     /* the key is drawn: one sample of what the dots are */
@@ -162,13 +172,13 @@
       } else { winG.style.display = 'none'; winRing.style.display = 'none'; }
       /* air arriving in the window */
       var w = '';
-      if (t > 21) for (var d = 0; d < 9; d++) {
-        var k = seg(t, 21.1 + d * .24, 22.6 + d * .24), a = d * .7 + 2.4;
-        if (k <= 0) continue;
-        /* from the bronchiole, inside the window, into the bare air sacs (never onto the capillaries) */
-        var x = lerp(WC.x - 148, WC.x - 30 + Math.cos(a) * 30, ease(k)), y = lerp(WC.y - 125, WC.y - 165 + Math.sin(a) * 18, ease(k));
-        w += '<circle class="ap__air" cx="' + n1(x) + '" cy="' + n1(y) + '" r="7"/>';
-      }
+      if (t > 20.7) SACS.forEach(function (q, d) {
+        var k = ease(seg(t, 20.8 + d * .2, 22.5 + d * .2));
+        if (k <= 0) return;
+        /* down the bronchiole, then out to its own alveolus */
+        var p = at(INTO.concat([q]), k);
+        w += '<circle class="ap__air" cx="' + n1(WX + p[0] * WK) + '" cy="' + n1(WY + p[1] * WK) + '" r="9" style="stroke:#0B6A8C;stroke-width:3"/>';
+      });
       winAir.innerHTML = w;
       var items = L.stillItems(still, itemsAt, itemsAt(tt), tt, memo, narrow + '|' + (lay ? lay.f : 0));
       gLab.innerHTML = K.names(lay, items, narrow, key, null, 14);

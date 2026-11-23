@@ -145,6 +145,17 @@ svg .lb__lead,svg .lb__halo{vector-effect:non-scaling-stroke}
 .xcard__h:hover{border-color:var(--accent)}
 .xcard__h:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .xcard__t{flex:1;min-width:0}
+/* a box beyond the syllabus, in its place among the cards: grey and dashed, its word in the one extension violet */
+.exam-list > li.xcard--beyond .xcard__h,.exam-list > li.xcard--beyond.is-open .xcard__h{background:var(--card-2);border:1px dashed var(--ext-rule);color:var(--ink)}
+.exam-list > li.xcard--beyond .xcard__b{background:var(--card-2);border:1px dashed var(--ext-rule);border-top:0}
+.xcard--beyond .tier{flex:none}
+.exam-eq{display:block;margin-top:6px;padding:6px 10px;border-radius:6px;background:var(--card);font-weight:600;font-size:15px;letter-spacing:.01em;overflow-wrap:anywhere}
+.kw-also{margin-top:14px;padding-top:12px;border-top:1px solid var(--edge)}
+.kw-also__h{font-weight:700;font-size:15px;margin-bottom:2px}
+.kw-also__hint{margin:0 0 8px;font-size:13px;color:var(--c34)}
+.kw-also__l{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px;font-size:15px}
+.kw-also__is{color:var(--ink)}
+.kw-also__no{display:inline-block;margin-left:8px;padding:1px 7px;border-radius:999px;font-size:13px;font-weight:600;background:var(--accent-tint);color:var(--accent)}
 .xcard__a{width:9px;height:9px;border-right:2px solid var(--grey);border-bottom:2px solid var(--grey);transform:rotate(45deg);transition:transform .2s;flex:none;margin-top:-4px}
 .xcard.is-open .xcard__h{border-color:var(--accent);background:var(--accent-tint);border-bottom-left-radius:0;border-bottom-right-radius:0}
 .xcard.is-open .xcard__a{transform:rotate(225deg);margin-top:4px}
@@ -249,6 +260,8 @@ svg .lb__lead,svg .lb__halo{vector-effect:non-scaling-stroke}
 .cellv__svg{flex:1;min-height:0;width:100%;height:100%;display:block}
 .cellv__veil{fill:var(--on-photo-veil);opacity:0;transition:opacity .3s ease;pointer-events:none}
 .cellv__veil.is-on{opacity:1}
+.cellv__layer{opacity:0;transition:opacity .3s ease;pointer-events:none}
+.cellv__layer.is-on{opacity:1}
 .cellv__note{margin:6px 8px 0;font-size:13.5px;font-weight:600;color:var(--amber);text-align:center}
 .cellv__note[hidden]{display:none}
 
@@ -461,11 +474,11 @@ html[data-lab-tab="do"] .viewcol #viewHost .lb{display:none}
 .sysv__d3{position:absolute;inset:0}
 
 /* ---------- this lab's step animations: the same frame for each (w-path, w-gases, w-lining, w-activity) ---------- */
-.ap__fig,.df__fig,.ac__fig,.lg__fig,.av__fig{position:relative;margin:0}
-.ap__svg,.df__svg,.ac__svg,.lg__svg,.av__svg{display:block;width:100%;height:auto}
-.ap__bg,.df__bg,.ac__bg,.lg__bg,.av__bg{fill:var(--col-card)}
-.ap__read,.df__read,.ac__read,.lg__read,.av__read{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 6px}
-.ap__read:empty,.df__read:empty,.ac__read:empty,.lg__read:empty,.av__read:empty{display:none}
+.ap__fig,.df__fig,.ac__fig,.lg__fig,.av__fig,.sa__fig,.tw__fig,.fa__fig{position:relative;margin:0}
+.ap__svg,.df__svg,.ac__svg,.lg__svg,.av__svg,.sa__svg,.tw__svg,.fa__svg{display:block;width:100%;height:auto}
+.ap__bg,.df__bg,.ac__bg,.lg__bg,.av__bg,.sa__bg,.tw__bg,.fa__bg{fill:var(--col-card)}
+.ap__read,.df__read,.ac__read,.lg__read,.av__read,.sa__read,.tw__read,.fa__read{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 6px}
+.ap__read:empty,.df__read:empty,.ac__read:empty,.lg__read:empty,.av__read:empty,.sa__read:empty,.tw__read:empty,.fa__read:empty{display:none}
 .ap__air{fill:#F2F5F7;stroke:#2B3A48;stroke-width:1.6}
 .ap__band--thin{stroke-width:11}
 .ap__band{fill:none;stroke:#4FC3F7;stroke-opacity:.38;stroke-width:26;stroke-linecap:round;stroke-linejoin:round}
@@ -496,6 +509,38 @@ html[data-lab-tab="do"] .viewcol #viewHost .lb{display:none}
 /* the wall of an alveolus (js/w-gases.js): the colours of a drawn section */
 .df__far{fill:#D9EEF7}
 .df__spot{fill:none;stroke:#0B6A8C;stroke-width:5}
+/* the three films of the surface's features */
+.sa__floor{fill:#F4F7F9}
+.sa__court{fill:#CFE3D6}
+.sa__line{fill:none;stroke:#fff;stroke-width:2.4}
+.sa__net{fill:none;stroke:#3C4C56;stroke-width:2.4}
+.sa__person{fill:#2A3A47}
+.sa__skin{fill:#F9BDA0;stroke:#B9704F;stroke-width:1.5}
+.sa__count rect{fill:#14212C;fill-opacity:.9}
+.sa__count text{font-family:var(--font);font-size:21px;font-weight:700;fill:#fff}
+.tw__glow{fill:#FFD84D;fill-opacity:.32;stroke:#B58900;stroke-width:1.5}
+.tw__br{fill:none;stroke:#14181D;stroke-width:3;stroke-linejoin:round}
+.tw__wall{fill:#F2B8B8}
+.tw__wline{stroke:#C98383;stroke-width:1.2}
+.tw__tag{fill:#14212C;fill-opacity:.92}
+.tw__n{font-family:var(--font);font-size:17px;font-weight:700;fill:#fff}
+.tw__h{font-family:var(--font);font-size:19px;font-weight:700;fill:var(--col-ink)}
+.fa__tissue{fill:#FBE9DF}
+.fa__capw{fill:none;stroke:#D98777;stroke-width:42}
+.fa__capl{fill:none;stroke:#F7DD9E;stroke-width:32}
+.fa__wall{fill:#EFA9A0;stroke:#EFA9A0;stroke-linecap:round;stroke-linejoin:round}
+.fa__wall circle{stroke:none}
+.fa__air{fill:#E2F2FA;stroke:#E2F2FA;stroke-linecap:round;stroke-linejoin:round}
+.fa__air circle{stroke:none}
+.fa__move{fill:none;stroke:#0B6A8C;stroke-width:9;stroke-linecap:round}
+.fa__read{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px}
+.fa__g{display:flex;flex-direction:column;gap:3px;min-width:0}
+.fa__gn{font-size:13.5px;font-weight:600;color:var(--col-ink)}
+.fa__gb{display:block;height:10px;border-radius:5px;background:var(--edge);overflow:hidden}
+.fa__gf{display:block;height:100%;border-radius:5px;width:0}
+.fa__gf--o{background:#E5483F}
+.fa__gf--c{background:#2F7FE0}
+.df__stream{fill:none;stroke:#C8953A;stroke-width:2;stroke-linecap:round;opacity:.4}
 .df__airsp{fill:#D9EEF7}
 .df__cell{fill:#F2B8B8;stroke:#B56A6A;stroke-width:.8}
 .df__nuc{fill:#7C4A7C;opacity:.85}

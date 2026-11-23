@@ -31,7 +31,8 @@ in its order and in its words. Then the questions say right or wrong, never the 
 | ✍️ **60 questions** | fill the gaps · multiple choice · put in order · match up · sort into groups · tick a grid · drag the words · press the part on a drawing |
 | 🦴 **A real chest in 3D** | the ribs, the external and internal intercostal muscles, the diaphragm, the lungs and the airways of one real body. Turn it, and take off each layer to see what lies under it |
 | 🌬️ **Breathe with your finger** | hold a button and the chest breathes in; hold the other and it breathes out hard. Look at the whole chest, the diaphragm or the rib muscles: the muscle fibres become shorter as they contract, beside the white tendon that does not, and the volume, the pressure and the air follow |
-| 🫧 **Gases crossing the wall** | oxygen and carbon dioxide molecules cross the wall of an alveolus in both directions, drawn to scale, with the net movement of each gas |
+| 🫧 **Gases diffusing across the wall** | the blood keeps flowing while oxygen and carbon dioxide molecules move across the wall of an alveolus in both directions, drawn to scale, with the net movement of each gas |
+| 🔍 **The surface, feature by feature** | zoom out from one alveolus to both lungs; compare a thin surface with a thick one; see what happens to the gradients when the air stops changing |
 | 🧪 **A limewater bench** | breathe in and out through two tubes of limewater and see which one turns cloudy first |
 | ❌ **Remember it with X** | Dr Mompel's own diagram to fill in: in e**x**piration, the e**x**ternal intercostal muscles rela**x** |
 | 🎬 **Step by step** | a breath of air from the nose to the alveoli; the gases at the wall; what happens to the air in the lungs; breathing in and out; from active muscles to deeper breathing; mucus and cilia at work. Each step waits for “Next step” |
@@ -60,7 +61,8 @@ and cilia as a defence against disease are in the [Immunity Lab](https://nlcsbio
 moves in it is worked out from its bones: each rib turns about its own joint with the spine, so the upper ribs lift like a
 pump handle and the lower ribs like a bucket handle, and the pressure and the air follow from the change in volume. The
 breathing system, the alveoli and the lining of the trachea are drawn by Servier Medical Art (CC BY 4.0). Every label is
-one straight, level line that ends on its part, and no two lines cross.
+one straight, level line that ends on its part, and no two lines cross. Pressing a name lights the exact outline
+of that part, traced from the drawing itself, and dims the rest.
 
 **Why the right answers are not in the page.** Each question carries a *scrambled fingerprint* of its answer. When a
 student answers, the page scrambles what they did in the same way and compares the two. Scrambling only works one way, so

@@ -1,13 +1,13 @@
 /* ============================================================
    w-gases.js — the gases themselves.
 
-     diffuse     "Gases crossing the wall of an alveolus" (station `surface`, 11.1.1): five steps, from the lung to one alveolus, then
-                 oxygen and carbon dioxide crossing its wall.
+     diffuse     "Gases diffusing across the wall of an alveolus" (station `surface`, 11.1.1): five steps, from the alveoli to one capillary
+                 on an alveolus, then oxygen and carbon dioxide diffusing across the wall into and out of the flowing blood.
      airchange   "What happens to the air in the lungs" (station `air`, 11.1.4, 11.1.9): one sample of air, in, changed, and out.
      GasDots     the counted dots both of them and the station's picture draw (equal volumes, one fixed layout).
 
    THE PICTURE OF THE WALL IS TO SCALE. The window is 30 µm wide: a red blood cell 7.5 µm, a capillary 8 µm, each wall about
-   0.5 µm. Only the molecules are drawn far larger than real (an oxygen molecule is about 0.0003 µm), and a line on the page says so.
+   0.5 µm. The blood flows from the first frame of the close-up, and goes on flowing while a step waits (WKit.world). Only the molecules are drawn far larger than real (an oxygen molecule is about 0.0003 µm), and a line on the page says so.
    DIFFUSION IS DRAWN AS IT IS (the syllabus's 3.1.1, the words the Topic 3 lab uses): the particles keep moving at random, some
    cross each way, and more cross from the higher concentration to the lower: that difference is the net movement.
    SOURCES: 0610 2026–28 11.1.1, 11.1.4, 11.1.9; schemes 0610/43/M/J/25 Q2(a), 0610/42/F/M/22 Q1(c)(ii), 0610/41/O/N/22 Q6(b)(i);
@@ -69,116 +69,159 @@
   var WD = { x0: 0, x1: 640, y0: 0, y1: 534 };
   /* the layers, in the picture's units (21.3 units = 1 µm) */
   var Y = { wall: 260, wall2: 270, gap: 274, cap: 284, lum0: 284, lum1: 454, capB: 464 };
-  /* step 5: the air and the blood move on at this speed (picture units a second) */
-  var FLOW = 34, T5 = 20.6;
+  /* where the film goes: a capillary on an alveolus, at the place where the drawing's network changes from blue to red, so the blood in
+     the close-up comes in on the left with less oxygen and leaves on the right with more (Daniel, 23 Nov 2026: "zooming into a place
+     that actually might make sense to what you're showing later") */
+  var SPOT = { x: 173, y: 333 };
+  /* the blood flows from the first frame of the close-up and never stops (his words: "make sure that flow is constantly visual"). It moves
+     BLOOD units a second on the world's clock (WKit.world); each molecule's whole story (air, wall, blood, away) takes CYC seconds */
+  var BLOOD = 34, CYC = 20;
   var D_STEPS = [
-    { t: 0, h: 'From the lung to one alveolus', p: [['ig', 'Oxygen must enter the blood, and carbon dioxide must leave the blood. Between the air and the blood there are only two thin walls: the **wall of the alveolus** and the **wall of the capillary**. Each wall is **one cell thick**.']] },
-    { t: 4.6, h: 'Oxygen diffuses into the blood', p: [['ig', 'The **oxygen concentration** is **higher in the alveolus** than in the blood. Oxygen molecules cross the wall in both directions, but more enter the blood. This **net movement** is **diffusion**.']] },
-    { t: 10.8, h: 'Carbon dioxide diffuses into the alveolus', p: [['ig', 'The **carbon dioxide concentration** is **higher in the blood** than in the alveolus, so the **net movement** of carbon dioxide is **into the alveolus**.']] },
-    { t: 16.6, h: 'Both gases at the same time', p: [['ig', 'Each gas moves from its higher concentration to its lower concentration: this is **down its own concentration gradient**. “Down” does not mean down the screen. The two gases move at the same time, in opposite directions.']] },
-    { t: 20.6, h: 'The gradients stay steep', p: [['ig', 'The **blood** carries oxygen away and brings more carbon dioxide. **Ventilation** brings fresh air. So both **concentration gradients are maintained**.']] }
+    { t: 0, h: 'From the alveoli to one capillary', p: [['ig', 'Oxygen must diffuse into the blood, and carbon dioxide must diffuse out of the blood. Between the air and the blood there are only two thin walls: the **wall of the alveolus** and the **wall of the capillary**. Each wall is **one cell thick**.']] },
+    { t: 4.6, h: 'Oxygen diffuses into the blood', p: [['ig', 'The **oxygen concentration** is **higher in the alveolus** than in the blood. Oxygen molecules move across the wall in both directions, but more move into the blood than out of it. This **net movement** is **diffusion**.']] },
+    { t: 10.8, h: 'Carbon dioxide diffuses into the alveolus', p: [['ig', 'The **carbon dioxide concentration** is **higher in the blood** than in the alveolus, so carbon dioxide **diffuses out of the blood**: its **net movement** is **into the alveolus**.']] },
+    { t: 16.6, h: 'Both gases at the same time', p: [['ig', 'Each gas diffuses from its higher concentration to its lower concentration: this is **down its own concentration gradient**. “Down” does not mean down the screen. The two gases diffuse at the same time, in opposite directions.']] },
+    { t: 20.6, h: 'The gradients stay steep', p: [['ig', 'The **blood** flows all the time: it transports oxygen from the alveoli and brings more carbon dioxide. **Ventilation** brings fresh air. So both **concentration gradients are maintained**.']] }
   ];
   var D_M = [0, 4.6, 10.8, 16.6, 20.6, 26.4];
-  var D_MOTION = { 'Gases crossing the wall of an alveolus': [4.6, 6.2, 5.8, 4, 5.8] };
-  /* the molecules. Each one wanders in its region; `cross` carries it through the walls at time c. */
-  function makeMol(kind, n, seedV, up0, net, tBase, back, tBoth) {
-    var r = rng(seedV), out = [];
-    for (var i = 0; i < n; i++) {
-      var inTop = i < up0, m = { kind: kind, x: 16 + r() * 608, f1: .5 + r() * .7, f2: .4 + r() * .8, a: r() * 6.3, b: r() * 6.3, ya: 22 + r() * (Y.wall - 36), yb: Y.lum0 + 14 + r() * 148 };
-      m.start = inTop ? 'air' : 'blood';
-      out.push(m);
-    }
-    /* those that cross: most down the gradient, a few the other way */
-    var down = out.filter(function (q) { return q.start === (kind === 'o2' ? 'air' : 'blood'); }), upw = out.filter(function (q) { return q.start !== (kind === 'o2' ? 'air' : 'blood'); });
-    down.slice(0, net).forEach(function (q, i) { q.c = tBase + .3 + i * (4.6 / net); q.d = 1.05; });
-    upw.slice(0, back).forEach(function (q, i) { q.c = tBase + 1 + i * (4 / Math.max(1, back)); q.d = 1.05; });
-    /* step 4: three more of each gas cross, down its own gradient, while the other gas crosses the other way */
-    down.slice(net, net + 3).forEach(function (q, i) { q.c = tBoth + i * .7; q.d = 1.05; });
-    return out;
-  }
-  /* the counts keep each gradient true at every frame, as a density: the air is 260 units high and the blood 170. Oxygen 42 in the air
-     and 4 in the blood; 9 enter the blood and 2 return, then 3 more enter (32 and 14 at the end: 12.3 and 8.2 per 100 units of height).
-     Carbon dioxide 25 in the blood and 3 in the air; 9 enter the air and 2 return, then 3 more enter (15 and 13 at the end: 8.8 in
-     the blood and 5 in the air). */
-  var O2 = makeMol('o2', 46, 3, 42, 9, 4.8, 2, 17), CO2 = makeMol('co2', 28, 9, 3, 9, 11, 2, 17.35);
-  function molAt(q, t) {
-    var wx = 10 * Math.sin(t * q.f1 + q.a), wy = 8 * Math.sin(t * q.f2 + q.b);
-    var from = q.start === 'air' ? q.ya : q.yb, to = q.start === 'air' ? q.yb : q.ya;
-    var k = q.c == null ? 0 : ease(seg(t, q.c, q.c + q.d));
-    var y = lerp(from, to, k) + wy, x = q.x + wx;
-    /* step 5: the air and the blood move on, so what has changed leaves at the right */
-    if (t > T5) { x += (t - T5) * FLOW; if (x > 650) return null; }
-    return [x, y];
-  }
-  /* what arrives from the left in step 5: fresh air and new blood, at the concentrations of the start (per 640 units of width: 42
-     oxygen and 3 carbon dioxide in the air; 4 oxygen and 25 carbon dioxide in the blood), behind the edge for the 200 units they travel */
-  var ARRIVE = (function () {
-    var r = rng(41), out = [];
-    function lane(n, kind, y0, y1) { for (var i = 0; i < n; i++) out.push({ kind: kind, x: -14 - r() * 200, y: y0 + r() * (y1 - y0), f1: .5 + r() * .7, f2: .4 + r() * .8, a: r() * 6.3, b: r() * 6.3 }); }
-    lane(13, 'o2', 22, Y.wall - 14); lane(1, 'co2', 22, Y.wall - 14);
-    lane(1, 'o2', Y.lum0 + 14, Y.lum1 - 8); lane(8, 'co2', Y.lum0 + 14, Y.lum1 - 8);
-    return out;
-  })();
-  function arriveAt(q, t) {
-    if (t <= T5) return null;
-    var x = q.x + (t - T5) * FLOW + 10 * Math.sin(t * q.f1 + q.a);
-    return x < -8 ? null : [x, q.y + 8 * Math.sin(t * q.f2 + q.b)];
-  }
-  /* red blood cells, flowing left to right along the capillary: deoxygenated at the left, oxygenated at the right */
-  var RBC = [0, 1, 2, 3, 4].map(function (i) { return { x: 40 + i * 165, y: Y.lum0 + 85 + (i % 2 ? 12 : -8) }; });
+  var D_MOTION = { 'Gases diffusing across the wall of an alveolus': [4.6, 6.2, 5.8, 4, 5.8] };
 
-  function wallSvg(t) {
-    var o = '';
-    /* the air in the alveolus, then the wall of the alveolus, a fine layer between the two cells, the wall of the capillary, the
-       plasma, and the far wall of the capillary */
-    o += '<rect class="df__airsp" x="0" y="0" width="640" height="' + Y.wall + '"/>';
+  /* THE MOLECULES, each one a story on the world's clock w. The counts keep each gradient true at every moment, as a density (the air is
+     260 units high and the blood 170; tools/film-truth.mjs measures it). Oxygen: 50 stay in the air, 20 cross into the blood at places
+     all along it and are carried away, 3 cross back, and 3 arrive already in the blood (blood reaching the lungs is not empty of oxygen). So
+     the blood holds little oxygen on the left and more on the right, and always less than the air. Carbon dioxide: the blood brings 26 from
+     the left, each crosses into the air at its own place, and 3 cross back; so the blood holds more on the left than on the right. */
+  function story(kind, dir, n, seed) {
+    var r = rng(seed), out = [];
+    for (var i = 0; i < n; i++) out.push({ kind: kind, dir: dir, ph: (i + r() * .7) * CYC / n, xc: 24 + r() * 520, ya: 30 + r() * (Y.wall - 62),
+      yb: Y.lum0 + 18 + r() * 134, f1: .5 + r() * .7, f2: .4 + r() * .8, a: r() * 6.3, b: r() * 6.3 });
+    return out;
+  }
+  function sway(q, w) { return [9 * Math.sin(w * q.f1 + q.a), 7 * Math.sin(w * q.f2 + q.b)]; }
+  /* from the air, across the wall, then carried on by the blood */
+  function intoBlood(q, w) {
+    var s = ((w + q.ph) % CYC + CYC) % CYC, v = sway(q, w), k;
+    if (s < 1.1) return { x: q.xc + v[0], y: q.ya + v[1], o: Math.min(1, s / .5) };
+    if (s < 2.3) { k = ease((s - 1.1) / 1.2); return { x: q.xc + v[0] * (1 - k) + 7 * k, y: lerp(q.ya + v[1], q.yb, k), o: 1 }; }
+    var x = q.xc + 7 + (s - 2.3) * BLOOD;
+    return x > 660 ? null : { x: x, y: q.yb + v[1] * .4, o: 1 };
+  }
+  /* carried in by the blood, across the wall, then out into the air */
+  function outOfBlood(q, w) {
+    var s = ((w + q.ph) % CYC + CYC) % CYC, v = sway(q, w), t0 = (q.xc + 16) / BLOOD, k;
+    if (s < t0) return { x: s * BLOOD - 16, y: q.yb + v[1] * .4, o: 1 };
+    if (s < t0 + 1.2) { k = ease((s - t0) / 1.2); return { x: q.xc + v[0] * k, y: lerp(q.yb + v[1] * .4, q.ya + v[1], k), o: 1 }; }
+    if (s < t0 + 3.2) return { x: q.xc + v[0], y: q.ya + v[1], o: 1 - (s - t0 - 1.2) / 2 };
+    return null;
+  }
+  var GASES = (function () {
+    var r = rng(5), air = [], base = [];
+    function still(kind, n) { for (var i = 0; i < n; i++) air.push({ kind: kind, x: 16 + r() * 608, y: 22 + r() * (Y.wall - 36), f1: .5 + r() * .7, f2: .4 + r() * .8, a: r() * 6.3, b: r() * 6.3 }); }
+    still('o2', 50); still('co2', 3);
+    for (var i = 0; i < 3; i++) base.push({ kind: 'o2', ph: i * 225 + r() * 60, y: Y.lum0 + 18 + r() * 134, f1: .5 + r() * .7, f2: .4 + r() * .8, a: r() * 6.3, b: r() * 6.3 });
+    return { air: air, base: base, o2in: story('o2', 1, 20, 3), o2back: story('o2', -1, 3, 8), co2out: story('co2', -1, 26, 9), co2back: story('co2', 1, 3, 14) };
+  })();
+  /* everything of one gas on the screen at the world's moment w: [x, y, opacity] */
+  function gasAt(kind, w) {
+    var out = [];
+    function add(p) { if (p) out.push([p.x, p.y, p.o]); }
+    GASES.air.forEach(function (q) { if (q.kind === kind) { var v = sway(q, w); out.push([q.x + v[0], q.y + v[1], 1]); } });
+    if (kind === 'o2') {
+      GASES.base.forEach(function (q) { var v = sway(q, w); out.push([((q.ph + w * BLOOD) % 680) - 20, q.y + v[1] * .4, 1]); });
+      GASES.o2in.forEach(function (q) { add(intoBlood(q, w)); });
+      GASES.o2back.forEach(function (q) { add(outOfBlood(q, w)); });
+    } else {
+      GASES.co2out.forEach(function (q) { add(outOfBlood(q, w)); });
+      GASES.co2back.forEach(function (q) { add(intoBlood(q, w)); });
+    }
+    return out;
+  }
+  global.GasFlow = { gasAt: gasAt, Y: Y, BLOOD: BLOOD, CYC: CYC };
+
+  /* the blood's cells: single file, 7.5 µm across in a capillary 8 µm wide, each loading oxygen as it passes */
+  function cellAt(i, w) {
+    var x = ((i * 178 + w * BLOOD) % 890) - 120;
+    return { x: x, y: Y.lum0 + 85 + (i % 2 ? 7 : -7) + 3 * Math.sin(w * .7 + i * 1.7), rot: 7 * Math.sin(x / 74 + i * 2), k: K.clamp01((x + 40) / 560) };
+  }
+  /* the section: the air, the wall of the alveolus, the fine layer between the two cells, the wall of the capillary, the flowing blood */
+  function wallSvg(w, u) {
+    var o = '', i;
+    o += '<rect class="df__airsp" x="0" y="0" width="640" height="' + Y.wall + '" fill="url(#' + u + 'air)"/>';
     o += '<path class="df__cell" d="M0 ' + Y.wall + ' H220 C250 ' + (Y.wall + 1) + ' 268 ' + (Y.wall - 15) + ' 300 ' + (Y.wall - 15) + ' C332 ' + (Y.wall - 15) + ' 350 ' + (Y.wall + 1) + ' 380 ' + Y.wall + ' H640 V' + Y.wall2 + ' H0 Z"/>';
     o += '<ellipse class="df__nuc" cx="300" cy="' + (Y.wall - 3) + '" rx="42" ry="9"/>';
     o += '<rect class="df__gap" x="0" y="' + Y.wall2 + '" width="640" height="' + (Y.gap - Y.wall2) + '"/>';
-    o += '<rect class="df__cap" x="0" y="' + Y.gap + '" width="640" height="' + (Y.cap - Y.gap) + '"/>';
-    o += '<rect class="df__plasma" x="0" y="' + Y.lum0 + '" width="640" height="' + (Y.lum1 - Y.lum0) + '"/>';
+    o += '<rect class="df__plasma" x="0" y="' + Y.lum0 + '" width="640" height="' + (Y.lum1 - Y.lum0) + '" fill="url(#' + u + 'pl)"/>';
+    /* fine streaks in the plasma, moving with the blood, so the flow shows between the cells too */
+    for (i = 0; i < 11; i++) {
+      var sx = ((i * 83 + w * BLOOD * 1.04) % 913) - 90, sy = Y.lum0 + 16 + (i * 53) % 138;
+      o += '<path class="df__stream" d="M' + n1(sx) + ' ' + sy + 'h' + (24 + (i * 7) % 18) + '"/>';
+    }
+    for (i = 0; i < 5; i++) { var c = cellAt(i, w); o += K.rbc(u, c.x, c.y, c.k, 11, 7.9, c.rot); }
+    /* the capillary's wall, above and below, with the bulge of one of its cells */
+    o += '<path class="df__cap" d="M0 ' + Y.gap + ' H640 V' + Y.cap + ' H520 C498 ' + Y.cap + ' 486 ' + (Y.cap + 11) + ' 462 ' + (Y.cap + 11) + ' C438 ' + (Y.cap + 11) + ' 426 ' + Y.cap + ' 404 ' + Y.cap + ' H0 Z"/>';
+    o += '<ellipse class="df__nuc" cx="462" cy="' + (Y.cap + 3) + '" rx="30" ry="6"/>';
     o += '<rect class="df__cap" x="0" y="' + Y.lum1 + '" width="640" height="' + (Y.capB - Y.lum1) + '"/>';
     o += '<rect class="df__tissue" x="0" y="' + Y.capB + '" width="640" height="70"/>';
-    /* the red blood cells, each 160 units (7.5 µm) across */
-    RBC.forEach(function (c) {
-      var x = ((c.x + (t > T5 ? (t - T5) * FLOW : 0)) % 825) - 90, k = Math.max(0, Math.min(1, x / 560));
-      /* oxygen loads as the cell passes the alveolus: darker red at the left, brighter at the right */
-      var col = 'rgb(' + Math.round(lerp(126, 214, k)) + ',' + Math.round(lerp(34, 48, k)) + ',' + Math.round(lerp(58, 52, k)) + ')';
-      o += '<g transform="translate(' + n1(x) + ' ' + c.y + ')"><ellipse rx="80" ry="33" fill="' + col + '"/><ellipse rx="42" ry="14" fill="#000" opacity=".22"/></g>';
-    });
     return o;
   }
+  global.GasFlow.wallSvg = wallSvg;
+  /* the defs of the section: the air's soft light, the plasma, a molecule of each gas lit from the top left, the blood's cells */
+  function sectionDefs(u) {
+    function ball(id, a, b, c) { return '<radialGradient id="' + u + id + '" cx=".36" cy=".32" r=".75"><stop offset="0" stop-color="' + a + '"/><stop offset=".55" stop-color="' + b + '"/><stop offset="1" stop-color="' + c + '"/></radialGradient>'; }
+    return '<linearGradient id="' + u + 'air" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E9F6FC"/><stop offset="1" stop-color="#CFE8F4"/></linearGradient>' +
+      '<linearGradient id="' + u + 'pl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F3D27F"/><stop offset=".5" stop-color="#F9E2A6"/><stop offset="1" stop-color="#F0CB74"/></linearGradient>' +
+      ball('mo', '#FFC2B8', '#FF6B5E', '#C93A2E') + ball('mc', '#BFE0FF', '#58A6FF', '#2467BE') + K.rbcDefs(u);
+  }
+  global.GasFlow.sectionDefs = sectionDefs;
+  function molSvg(p, kind, u, op) {
+    var a = p[2] * op; if (a <= .01) return '';
+    return '<circle cx="' + n1(p[0]) + '" cy="' + n1(p[1]) + '" r="6" fill="url(#' + u + (kind === 'o2' ? 'mo' : 'mc') + ')" stroke="' + (kind === 'o2' ? '#5A1109' : '#0E2F59') + '" stroke-width="1"' + (a < .995 ? ' opacity="' + n1(a * 100) / 100 + '"' : '') + '/>';
+  }
+  global.GasFlow.molSvg = molSvg;
   /* a thick filled arrow for a net movement (memory concentration-pictures-equal-volumes): width = how much */
   function flow(x, y0, y1, w, cls) {
     var dir = y1 > y0 ? 1 : -1, hd = 16, hw = w + 9, ye = y1 - dir * hd;
     return '<path class="' + cls + '" d="M' + (x - w / 2) + ' ' + y0 + 'L' + (x - w / 2) + ' ' + ye + 'L' + (x - hw / 2) + ' ' + ye + 'L' + x + ' ' + y1 + 'L' + (x + hw / 2) + ' ' + ye + 'L' + (x + w / 2) + ' ' + ye + 'L' + (x + w / 2) + ' ' + y0 + 'Z"/>';
   }
+  global.GasFlow.arrow = flow;
+  var DF_N = 0;
 
   function diffuse(spec) {
-    var title = spec.title || 'Gases crossing the wall of an alveolus';
-    var S = K.shell(spec, 'df', title, 'The wall of an alveolus and a capillary, with oxygen and carbon dioxide molecules crossing it.', []);
+    var title = spec.title || 'Gases diffusing across the wall of an alveolus', u = 'df' + (++DF_N) + '-';
+    var S = K.shell(spec, 'df', title, 'A capillary on the wall of an alveolus. Blood flows through it, and oxygen and carbon dioxide molecules diffuse across the two thin walls.', []);
     var svg = S.svg, NSV = K.NS;
     var defs = document.createElementNS(NSV, 'defs');
-    defs.innerHTML = '<clipPath id="dfClip"><rect x="0" y="0" width="640" height="' + WD.y1 + '" rx="12"/></clipPath>';
+    defs.innerHTML = '<clipPath id="' + u + 'clip"><rect x="0" y="0" width="640" height="' + WD.y1 + '" rx="12"/></clipPath>' + sectionDefs(u);
     svg.appendChild(defs);
     var bg = document.createElementNS(NSV, 'rect'); bg.setAttribute('class', 'df__bg'); svg.appendChild(bg);
     var model = document.createElementNS(NSV, 'g'); svg.appendChild(model);
-    var art = document.createElementNS(NSV, 'g'); art.setAttribute('clip-path', 'url(#dfClip)'); model.appendChild(art);
+    var art = document.createElementNS(NSV, 'g'); art.setAttribute('clip-path', 'url(#' + u + 'clip)'); model.appendChild(art);
     var cr = document.createElementNS(NSV, 'rect');
     var gLab = document.createElementNS(NSV, 'g'); svg.appendChild(gLab);
+    /* the key names only what is on the screen; its row keeps its height */
     var keyEl = dotKey([[INK.o2, 'oxygen'], [INK.co2, 'carbon dioxide']]); S.fig.appendChild(keyEl);
-    var keyO = keyEl.querySelector('[data-k="oxygen"]'), keyC = keyEl.querySelector('[data-k="carbon dioxide"]');
+    keyEl.insertAdjacentHTML('afterbegin', '<span class="gk__i" data-k="red blood cell"><svg viewBox="-9 -7 18 14" aria-hidden="true"><g transform="scale(1.15 .9)"><use href="#' + u + 'rbF"/></g></svg>red blood cell</span>');
+    var keyO = keyEl.querySelector('[data-k="oxygen"]'), keyC = keyEl.querySelector('[data-k="carbon dioxide"]'), keyR = keyEl.querySelector('[data-k="red blood cell"]');
     var lay = null, narrow = false, key = K.pinKey(S), memo = {};
-    var TL = K.timeline(D_M, null, D_MOTION, title), R = TL.R, clock = TL.clock;
+    var TL = K.timeline(D_M, null, D_MOTION, title), R = TL.R, clock = TL.clock, worldAt = function (m) { return m; };
 
+    /* the camera of step 1, from the whole drawing to the capillary */
+    function camAt(t) {
+      /* a zoom whose target travels in a straight line on the screen, so it stays in the picture all the way */
+      var s = lerp(2.05, 11, ease(seg(t, .3, 3.3))), k = (1 / s - 1 / 2.05) / (1 / 11 - 1 / 2.05);
+      return { s: s, cx: lerp(131, SPOT.x, k), cy: lerp(240, SPOT.y, k) };
+    }
     function labelsAt(t) {
       var it = [];
+      if (t >= 1.5 && t < 3.05) {
+        var c = camAt(t);
+        it.push({ id: 'capz', text: 'capillary on an alveolus', x: 320 + (SPOT.x - c.cx) * c.s, y: WD.y1 / 2 + (SPOT.y - c.cy) * c.s, side: 'R' });
+      }
       if (t >= 4.3) {
         it.push({ id: 'air', text: 'air in the alveolus', x: 60, y: 120, side: 'L' });
         it.push({ id: 'wall', text: 'wall of the alveolus', x: 100, y: Y.wall + 5, side: 'L' });
         it.push({ id: 'cap', text: 'wall of the capillary', x: 560, y: Y.gap + 5, side: 'R' });
-        /* on one cell, and moving with it when the blood flows on */
-        it.push({ id: 'rbc', text: 'red blood cell', x: ((RBC[3].x + Math.max(0, t - T5) * FLOW) % 825) - 60, y: RBC[3].y, side: 'R' });
+        it.push({ id: 'blood', text: 'flowing blood', x: 40, y: Y.lum0 + 150, side: 'L' });
       }
       if (t >= 4.6 && t < 16.6) it.push({ id: 'hi', text: t < 10.8 ? 'net movement of oxygen' : 'net movement of carbon dioxide', x: t < 10.8 ? 210 : 430, y: Y.wall - 26, side: t < 10.8 ? 'L' : 'R' });
       return it;
@@ -186,50 +229,49 @@
     var itemsAt = K.itemsOf(function () { return lay; }, function (tt) { return labelsAt(clock(tt)); }, true);
 
     function draw(tt, still) {
-      var t = clock(tt), o = '';
-      /* step 1: the wider picture, closing in on one alveolus; the wall opens inside it */
-      var z = ease(seg(t, .3, 4.3)), w = seg(t, 3.1, 4.4);
+      var t = clock(tt), wt = still ? t : worldAt(t), o = '';
+      /* step 1: the wider picture closing in on one capillary; the section opens inside it */
+      var w = seg(t, 3.05, 4.35);
       if (w < 1) {
-        var s = lerp(2.05, 8.4, z), cx = lerp(131, 200, z), cy = lerp(190, 248, z);
+        var c = camAt(t);
         o += '<rect x="0" y="0" width="640" height="' + WD.y1 + '" class="df__far"/>';
-        o += '<g transform="translate(' + n1(320 - cx * s) + ' ' + n1(WD.y1 / 2 - cy * s) + ') scale(' + n1(s * 100) / 100 + ')"><image href="assets/photos/sv-alveoli.svg" x="0" y="0" width="262" height="380"/></g>';
-        /* the place on the alveolus that the close-up will open from */
-        var mk = seg(t, .9, 1.5) * (1 - seg(t, 3.1, 3.4));
-        if (mk > 0) o += '<circle class="df__spot" cx="' + n1(320 + (200 - cx) * s) + '" cy="' + n1(WD.y1 / 2 + (248 - cy) * s) + '" r="30" opacity="' + n1(mk * 100) / 100 + '"/>';
+        o += '<g transform="translate(' + n1(320 - c.cx * c.s) + ' ' + n1(WD.y1 / 2 - c.cy * c.s) + ') scale(' + n1(c.s * 100) / 100 + ')"><image href="assets/photos/sv-alveoli.svg" x="0" y="0" width="262" height="380"/></g>';
+        /* the place the close-up will open from */
+        var mk = seg(t, 1.1, 1.7) * (1 - seg(t, 3.05, 3.3));
+        if (mk > 0) o += '<circle class="df__spot" cx="' + n1(320 + (SPOT.x - c.cx) * c.s) + '" cy="' + n1(WD.y1 / 2 + (SPOT.y - c.cy) * c.s) + '" r="46" opacity="' + n1(mk * 100) / 100 + '"/>';
       }
       if (w > 0) {
-        /* the close-up is a window growing out of that place on the alveolus */
         var open = 430 * ease(w);
-        o += '<clipPath id="dfOpen"><circle cx="320" cy="' + WD.y1 / 2 + '" r="' + n1(open) + '"/></clipPath><g clip-path="url(#dfOpen)">' + wallSvg(t);
+        o += '<clipPath id="' + u + 'open"><circle cx="320" cy="' + WD.y1 / 2 + '" r="' + n1(open) + '"/></clipPath><g clip-path="url(#' + u + 'open)">' + wallSvg(wt, u);
         if (t > 4.2) {
-          var showO = ease(seg(t, 4.6, 5.2)), showC = ease(seg(t, 10.8, 11.4));
-          var mol = function (a, kind, op) { if (a) o += '<circle cx="' + n1(a[0]) + '" cy="' + n1(a[1]) + '" r="6" fill="' + INK[kind] + '" stroke="' + (kind === 'o2' ? '#5A1109' : '#0E2F59') + '" stroke-width="1.1" opacity="' + n1(op * 100) / 100 + '"/>'; };
-          O2.forEach(function (q) { mol(molAt(q, t), 'o2', showO); });
-          if (t > 10.6) CO2.forEach(function (q) { mol(molAt(q, t), 'co2', showC); });
-          ARRIVE.forEach(function (q) { mol(arriveAt(q, t), q.kind, 1); });
+          var showO = (t < 10.8 ? ease(seg(t, 4.6, 5.2)) : t < 16.6 ? lerp(1, .22, seg(t, 10.8, 11.2)) : lerp(.22, 1, seg(t, 16.6, 17))), showC = ease(seg(t, 10.8, 11.4));
+          gasAt('o2', wt).forEach(function (p) { o += molSvg(p, 'o2', u, showO); });
+          if (showC > 0) gasAt('co2', wt).forEach(function (p) { o += molSvg(p, 'co2', u, showC); });
         }
         /* the net movement of each gas: one filled arrow across the wall */
         var ao = t < 10.8 ? seg(t, 4.6, 5.2) : t < 16.6 ? lerp(1, .28, seg(t, 10.8, 11.2)) : lerp(.28, 1, seg(t, 16.6, 17));
         var ac = t < 16.6 ? seg(t, 10.8, 11.4) : 1;
         if (ao > 0) o += '<g opacity="' + n1(ao * 100) / 100 + '">' + flow(210, Y.wall - 42, Y.lum0 + 40, 16, 'df__neto') + '</g>';
         if (ac > 0) o += '<g opacity="' + n1(ac * 100) / 100 + '">' + flow(430, Y.lum0 + 40, Y.wall - 42, 16, 'df__netc') + '</g>';
-        /* step 5: fresh air arrives from above, blood carries on to the right */
+        /* step 5: what keeps the gradients: fresh air from above, the blood moving on */
         if (t > 20.8) {
           var fr = seg(t, 20.8, 21.6);
           o += '<g opacity="' + n1(fr * 100) / 100 + '"><path class="df__move" d="M28 40 H150 M132 26 L152 40 L132 54"/><rect x="23" y="9" width="72" height="22" rx="5" class="df__chip"/><text class="df__w" x="28" y="26">fresh air</text>' +
-            '<path class="df__move df__move--b" d="M28 ' + (WD.y1 - 96) + ' H150 M132 ' + (WD.y1 - 110) + ' L152 ' + (WD.y1 - 96) + ' L132 ' + (WD.y1 - 82) + '"/><rect x="157" y="' + (WD.y1 - 110) + '" width="110" height="22" rx="5" class="df__chip df__chip--b"/><text class="df__w df__w--b" x="162" y="' + (WD.y1 - 94) + '">flowing blood</text></g>';
+            '<path class="df__move df__move--b" d="M28 ' + (WD.y1 - 96) + ' H150 M132 ' + (WD.y1 - 110) + ' L152 ' + (WD.y1 - 96) + ' L132 ' + (WD.y1 - 82) + '"/></g>';
         }
         o += '</g>';
       }
       art.innerHTML = o;
-      /* the key names a gas only from the step that shows it; its row keeps its height */
+      /* the key names a part only from the step that shows it */
+      keyR.style.visibility = t >= 3.3 ? 'visible' : 'hidden';
       keyO.style.visibility = t >= 4.6 ? 'visible' : 'hidden'; keyC.style.visibility = t >= 10.8 ? 'visible' : 'hidden';
-      /* the scale: true for the wall's picture */
+      /* the scale: true for the section */
       if (t >= 4.3) art.innerHTML += '<g class="df__scale" transform="translate(462 ' + (WD.y1 - 22) + ')"><line x1="0" y1="0" x2="106.5" y2="0"/><line x1="0" y1="-5" x2="0" y2="5"/><line x1="106.5" y1="-5" x2="106.5" y2="5"/><text x="112" y="5">5 µm</text></g>';
       var items = L.stillItems(still, itemsAt, itemsAt(tt), tt, memo, narrow + '|' + (lay ? lay.f : 0));
       gLab.innerHTML = K.names(lay, items, narrow, key, null, 14);
     }
     var sp = L.stepper({ steps: K.readerSteps(D_STEPS, R), end: TL.end, render: draw, flow: TL.flow, stills: K.stillsOf(D_STEPS, TL) });
+    worldAt = K.world(S, sp, function () { draw(sp.time()); });
     return K.mount(S, sp, 'df', [['Drawn to scale, except the molecules, which are drawn far larger than real.']], function (Dw, nar) {
       narrow = nar;
       var m = K.margins(nar, 13.5, 13.5, 120, 120);
@@ -242,19 +284,19 @@
   /* ---------------------------------------------------------------- airchange ------------------------------------- */
   var AV_STEPS = [
     { t: 0, h: 'Inspired air enters', p: [['ig', 'This box holds a sample of **inspired air**: 2,500 particles. About **21 %** are oxygen. Only **0.04 %** are carbon dioxide, which is 1 particle here.']] },
-    { t: 3.6, h: 'Oxygen leaves the air', p: [['ig', 'In the alveoli, **oxygen diffuses into the blood**. It is used in **aerobic respiration** in the cells. So the air you breathe out holds about **16 %** oxygen.']] },
-    { t: 8.4, h: 'Carbon dioxide enters the air', p: [['ig', '**Carbon dioxide**, produced by aerobic respiration, **diffuses from the blood** into the alveoli. So the air you breathe out holds about **4 %** carbon dioxide.']] },
-    { t: 13.2, h: 'Water vapour enters the air', p: [['ig', '**Water evaporates** from the moist surface of the alveoli. The air now holds as much **water vapour** as air can hold at this temperature: the air is **saturated**.']] },
+    { t: 3.6, h: 'Oxygen diffuses out of the air', p: [['ig', 'In the alveoli, **oxygen diffuses into the blood**. It is used in **aerobic respiration** in the cells. So the air you breathe out holds about **16 %** oxygen.']] },
+    { t: 8.4, h: 'Carbon dioxide diffuses into the air', p: [['ig', '**Carbon dioxide**, produced by aerobic respiration, **diffuses from the blood** into the alveoli. So the air you breathe out holds about **4 %** carbon dioxide.']] },
+    { t: 13.2, h: 'Water evaporates into the air', p: [['ig', '**Water evaporates** from the moist surface of the alveoli, and **aerobic respiration** also produces water. The air now holds as much **water vapour** as air can hold at this temperature: the air is **saturated**.']] },
     { t: 17.6, h: 'Expired air leaves', p: [['ig', 'This is **expired air**: **less oxygen**, **more carbon dioxide** and **more water vapour** than inspired air.']] }
   ];
   var AV_M = [0, 3.6, 8.4, 13.2, 17.6, 21];
   var AV_MOTION = { 'What happens to the air in the lungs': [3.4, 4.3, 4.3, 3.7, 3.3] };
   function airchange(spec) {
     var title = spec.title || 'What happens to the air in the lungs';
-    var S = K.shell(spec, 'av', title, 'A box of air particles: oxygen leaves, carbon dioxide and water vapour enter.', []);
+    var S = K.shell(spec, 'av', title, 'A box of air particles: oxygen diffuses out, carbon dioxide diffuses in, and water evaporates into the air.', []);
     S.fig.removeChild(S.svg);
     var wrap = h('div', 'av__stage'), cv = document.createElement('canvas');
-    cv.className = 'av__cv'; cv.setAttribute('role', 'img'); cv.setAttribute('aria-label', 'A box of 2,500 air particles. Oxygen leaves, then carbon dioxide and water vapour enter.');
+    cv.className = 'av__cv'; cv.setAttribute('role', 'img'); cv.setAttribute('aria-label', 'A box of 2,500 air particles. Oxygen diffuses out, carbon dioxide diffuses in, then water evaporates into the air.');
     wrap.appendChild(cv); S.fig.appendChild(wrap);
     var read = h('div', 'av__nums',
       '<span class="av__n" data-g="o2"><i style="background:' + INK.o2 + '"></i>oxygen <b></b></span>' +
