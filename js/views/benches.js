@@ -2,8 +2,9 @@
    views/benches.js — the stations' pictures that are made to be used.
 
      airsample   station 4: two equal volumes of air as counted dots; press a gas to compare it
-     limebench   station 5: the limewater bench: Breathe in draws air through tube A, Breathe out pushes it through tube B, and each
-                 tube turns cloudy according to the carbon dioxide that has really passed through it
+     limebench   station 5: the limewater bench, drawn as the T11 summary draws it: Breathe in draws air through the tube on the
+                 right, Breathe out pushes it through the tube on the left, and each turns cloudy according to the carbon dioxide
+                 that has really passed through it
      reportview  station 8: your report as a page of five parts to press. Empty on purpose: no table, graph or words of the investigation.
    ============================================================ */
 (function (global) {
@@ -69,28 +70,32 @@
   Views.add('airsample', airsample);
 
   /* ---------------------------------------------------------------- station 5 ------------------------------------- */
-  /* The bench. On breathing in, air is drawn in through the long tube of A, bubbles up through its limewater, and on to the mouthpiece;
-     on breathing out, air goes down the long tube of B and bubbles up through its limewater, out of B's short tube.
-     Cloudiness follows the carbon dioxide that has passed: expired air holds 100 times more (0.04 % against 4 %), so B clouds within
-     a few breaths and A only after a hundred times as many. */
+  /* The bench, drawn as the T11 summary draws it since 25 Nov 2026: the tube for expired air on the LEFT, the tube for inspired air
+     on the RIGHT, no letters, each tube named by its air (why: the KEPT PRIVATE list at the head of the lab's master, which is never
+     published). On breathing in, air is drawn in through the long tube on the right, bubbles up through that limewater, and on to the
+     mouthpiece; on breathing out, air goes down the long tube on the left, bubbles up through that limewater, and out of its short
+     tube. Cloudiness follows the carbon dioxide that has passed: expired air holds 100 times more (0.04 % against 4 %), so its
+     limewater clouds within a few breaths and the other only after a hundred times as many. */
   var FULL = 7.5;          /* seconds of expired air for the limewater to become fully cloudy */
+  var XO = 162, XI = 458;  /* the middle of the tube for expired air (left) and of the tube for inspired air (right) */
   function limebench(spec, ctx) {
     var root = h('div', 'lbv');
     var svgWrap = h('div', 'lbv__stage');
     svgWrap.innerHTML =
-      '<svg viewBox="0 0 620 470" class="lbv__svg" role="img" aria-label="Two test tubes of limewater, A and B, joined to one mouthpiece.">' +
+      '<svg viewBox="0 0 620 470" class="lbv__svg" role="img" aria-label="Two test tubes of limewater joined to one mouthpiece. Expired air passes through the tube on the left, and inspired air passes through the tube on the right.">' +
       '<defs><linearGradient id="lbGlass" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity=".75"/><stop offset=".5" stop-color="#fff" stop-opacity=".12"/><stop offset="1" stop-color="#fff" stop-opacity=".5"/></linearGradient></defs>' +
       /* the glass tubes */
       '<path class="lbv__pipe" d="M310 34 V92 M310 92 H196 V144 M310 92 H424 V144"/>' +
-      /* tube A: its short tube to the mouthpiece, its long tube open to the air */
-      '<path class="lbv__pipe" d="M196 144 V176"/><path class="lbv__pipe" d="M128 70 V330"/>' +
-      /* tube B: its long tube from the mouthpiece, its short tube open to the air */
-      '<path class="lbv__pipe" d="M424 144 V330"/><path class="lbv__pipe" d="M492 70 V176"/>' +
-      '<g id="lbA"></g><g id="lbB"></g>' +
-      '<rect x="276" y="6" width="68" height="30" rx="8" class="lbv__mouth"/>' +
-      '<text x="310" y="26" class="lbv__s" text-anchor="middle">mouth</text>' +
-      '<text x="162" y="452" class="lbv__big" text-anchor="middle">A</text><text x="458" y="452" class="lbv__big" text-anchor="middle">B</text>' +
-      '<text x="128" y="60" class="lbv__s" text-anchor="middle">air in</text><text x="492" y="60" class="lbv__s" text-anchor="middle">air out</text>' +
+      /* the tube for expired air: its long tube from the mouthpiece, its short tube open to the air */
+      '<path class="lbv__pipe" d="M196 144 V330"/><path class="lbv__pipe" d="M128 70 V176"/>' +
+      /* the tube for inspired air: its short tube to the mouthpiece, its long tube open to the air */
+      '<path class="lbv__pipe" d="M424 144 V176"/><path class="lbv__pipe" d="M492 70 V330"/>' +
+      '<g id="lbOut"></g><g id="lbIn"></g>' +
+      '<rect x="260" y="6" width="100" height="30" rx="8" class="lbv__mouth"/>' +
+      '<text x="310" y="26" class="lbv__s" text-anchor="middle">mouthpiece</text>' +
+      '<text x="' + XO + '" y="452" class="lbv__air lbv__out" text-anchor="middle">expired air</text>' +
+      '<text x="' + XI + '" y="452" class="lbv__air lbv__in" text-anchor="middle">inspired air</text>' +
+      '<text x="128" y="60" class="lbv__s lbv__out" text-anchor="middle">air out</text><text x="492" y="60" class="lbv__s lbv__in" text-anchor="middle">air in</text>' +
       '<g id="lbAir"></g></svg>';
     root.appendChild(svgWrap);
     var read = h('p', 'lbv__say', 'Press Breathe in or Breathe out. Hold the button to keep breathing.');
@@ -100,8 +105,8 @@
     var bIn = h('button', 'lbv__go', 'Breathe in'), bOut = h('button', 'lbv__go lbv__go--out', 'Breathe out'), bNew = h('button', 'lbv__re', 'Fresh limewater');
     [bIn, bOut, bNew].forEach(function (b) { b.type = 'button'; bar.appendChild(b); });
     root.appendChild(bar);
-    var gA = svgWrap.querySelector('#lbA'), gB = svgWrap.querySelector('#lbB'), gAir = svgWrap.querySelector('#lbAir');
-    var co2A = 0, co2B = 0, mode = 0, t0 = 0, raf = 0, lastT = 0, TT = 0, secs = [0, 0];
+    var gOut = svgWrap.querySelector('#lbOut'), gIn = svgWrap.querySelector('#lbIn'), gAir = svgWrap.querySelector('#lbAir');
+    var co2In = 0, co2Out = 0, mode = 0, raf = 0, lastT = 0, TT = 0;
     function tube(x, cloud) {
       var liq = 'rgba(' + Math.round(216 + 26 * cloud) + ',' + Math.round(236 + 8 * cloud) + ',' + Math.round(246 - 6 * cloud) + ',' + (.12 + .84 * cloud).toFixed(3) + ')';
       return '<path class="lbv__glass" d="M' + (x - 54) + ' 150 V384 a54 46 0 0 0 108 0 V150 Z"/>' +
@@ -134,27 +139,28 @@
       return o;
     }
     function draw() {
-      var cA = Math.min(1, co2A / FULL), cB = Math.min(1, co2B / FULL);
-      gA.innerHTML = tube(162, cA) + (mode === 1 ? bubbles(128, TT) : '');
-      gB.innerHTML = tube(458, cB) + (mode === 2 ? bubbles(424, TT) : '');
+      var cI = Math.min(1, co2In / FULL), cO = Math.min(1, co2Out / FULL);
+      gOut.innerHTML = tube(XO, cO) + (mode === 2 ? bubbles(196, TT) : '');
+      gIn.innerHTML = tube(XI, cI) + (mode === 1 ? bubbles(492, TT) : '');
       var a = '';
-      if (mode === 1) a = flow([[128, 66], [128, 330]], TT, 'lbv__a') + flow([[196, 176], [196, 92], [310, 92], [310, 36]], TT, 'lbv__a');
-      if (mode === 2) a = flow([[310, 36], [310, 92], [424, 92], [424, 330]], TT, 'lbv__a lbv__a--o') + flow([[492, 176], [492, 66]], TT, 'lbv__a lbv__a--o');
+      if (mode === 1) a = flow([[492, 66], [492, 330]], TT, 'lbv__a') + flow([[424, 176], [424, 92], [310, 92], [310, 36]], TT, 'lbv__a');
+      if (mode === 2) a = flow([[310, 36], [310, 92], [196, 92], [196, 330]], TT, 'lbv__a lbv__a--o') + flow([[128, 176], [128, 66]], TT, 'lbv__a lbv__a--o');
       gAir.innerHTML = a;
     }
     function words() {
-      var cB = co2B / FULL, cA = co2A / FULL;
-      if (mode === 1) read.textContent = 'Breathing in: air moves through tube A. Inspired air holds about 0.04 % carbon dioxide.';
-      else if (mode === 2) read.textContent = 'Breathing out: air moves through tube B. Expired air holds about 4 % carbon dioxide.';
-      else if (cB >= 1) read.textContent = cA >= .5 ? 'Both tubes are now cloudy, but B turned cloudy far sooner.' : 'B is cloudy and A is still clear: expired air contains more carbon dioxide than inspired air.';
-      else if (cB > .05) read.textContent = 'B is turning cloudy. Keep breathing in and out.';
+      var cO = co2Out / FULL, cI = co2In / FULL;
+      /* two lines at most on a phone of 360 px or more (measured); a no-break space keeps each % beside its number */
+      if (mode === 1) read.textContent = 'Breathing in: inspired air (about 0.04 % carbon dioxide) passes through the limewater on the right.';
+      else if (mode === 2) read.textContent = 'Breathing out: expired air (about 4 % carbon dioxide) passes through the limewater on the left.';
+      else if (cO >= 1) read.textContent = cI >= .5 ? 'Both tubes are now cloudy, but the limewater with expired air turned cloudy far sooner.' : 'Only the limewater with expired air is cloudy: expired air contains more carbon dioxide than inspired air.';
+      else if (cO > .05) read.textContent = 'The limewater with expired air is turning cloudy. Keep breathing in and out.';
     }
     function tick(ts) {
       raf = 0;
       var dt = lastT ? Math.min(.05, (ts - lastT) / 1000) : .016; lastT = ts;
       TT += dt;
-      if (mode === 1) co2A += dt * .01;           /* 0.04 % against 4 %: a hundred times less carbon dioxide per second */
-      if (mode === 2) co2B += dt;
+      if (mode === 1) co2In += dt * .01;          /* 0.04 % against 4 %: a hundred times less carbon dioxide per second */
+      if (mode === 2) co2Out += dt;
       draw();
       if (mode) raf = requestAnimationFrame(tick); else lastT = 0;
     }
@@ -163,7 +169,7 @@
       function on(e) {
         if (held) return; held = true; if (e && e.pointerId != null && b.setPointerCapture) { try { b.setPointerCapture(e.pointerId); } catch (x) {} }
         b.classList.add('is-on'); mode = m; words();
-        if (still()) { if (m === 1) co2A += .03; else co2B += FULL / 4; draw(); words(); return; }
+        if (still()) { if (m === 1) co2In += .03; else co2Out += FULL / 4; draw(); words(); return; }
         if (!raf) { lastT = 0; raf = requestAnimationFrame(tick); }
       }
       function off() { if (!held) return; held = false; b.classList.remove('is-on'); mode = 0; draw(); words(); }
@@ -173,14 +179,14 @@
       b.addEventListener('keyup', function (e) { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); off(); } });
     }
     hold(bIn, 1); hold(bOut, 2);
-    bNew.addEventListener('click', function () { co2A = 0; co2B = 0; mode = 0; draw(); read.textContent = 'Fresh limewater in both tubes. Press Breathe in or Breathe out.'; });
+    bNew.addEventListener('click', function () { co2In = 0; co2Out = 0; mode = 0; draw(); read.textContent = 'Fresh limewater in both tubes. Press Breathe in or Breathe out.'; });
     draw();
     return {
-      el: root, say: 'Tube A tests the air you breathe in. Tube B tests the air you breathe out', credit: 'Drawn for this lab, after the apparatus in the Lesson 4 slides',
+      el: root, say: 'The tube on the right tests the air you breathe in. The tube on the left tests the air you breathe out', credit: 'Drawn for this lab',
       labels: { test: 'limewater', setup: 'the apparatus', result: 'the result', means: 'what it means' },
       focus: function (part) {
         svgWrap.setAttribute('data-part', part || '');
-        if (part === 'result' && co2B < FULL) { co2B = FULL; co2A = Math.max(co2A, .05); draw(); words(); }
+        if (part === 'result' && co2Out < FULL) { co2Out = FULL; co2In = Math.max(co2In, .05); draw(); words(); }
       },
       stop: function () { mode = 0; if (raf) { cancelAnimationFrame(raf); raf = 0; } draw(); }
     };

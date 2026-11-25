@@ -10,6 +10,9 @@
   /* the parts of a station (a block of What you need to know, and its button on the picture): blue and teal, far from the
      inks of the words (green, orange, rose); the teal is close to the lab's own (violet until 11 Nov 2026, when violet came to mean extension; Daniel chose teal) */
   --pt1-ink:#1E5BB8; --pt1-tint:#EAF1FC; --pt1-edge:#B9D0F2; --pt2-ink:#0F766E; --pt2-tint:#E6F4F1; --pt2-edge:#A8D8CF;
+  /* the limewater bench's words for each air: the colours of Breathe in and Breathe out; the orange a shade darker than the
+     button's, so small words stay above 4.5 : 1 on the bench */
+  --lb-in:#0B6A8C; --lb-out:#A04A0C;
 }
 @media (prefers-color-scheme: dark){
 :root:not([data-theme="light"]){
@@ -20,6 +23,7 @@
   --rt-bg:#16202A; --rt-path:#9AA8B5; --rt-shut:#F06A5E; --rt-ill:#F06A5E; --rt-well:#6FA8EC;
   --ch-pale:#0E141B;
   --pt1-ink:#8DB9FF; --pt1-tint:#14233A; --pt1-edge:#2C4C7A; --pt2-ink:#7FD8C9; --pt2-tint:#12302C; --pt2-edge:#2D6A61;
+  --lb-in:#6FD0F5; --lb-out:#F5A35C;
 }
 }
 :root[data-theme="dark"]{
@@ -30,6 +34,7 @@
   --rt-bg:#16202A; --rt-path:#9AA8B5; --rt-shut:#F06A5E; --rt-ill:#F06A5E; --rt-well:#6FA8EC;
   --ch-pale:#0E141B;
   --pt1-ink:#8DB9FF; --pt1-tint:#14233A; --pt1-edge:#2C4C7A; --pt2-ink:#7FD8C9; --pt2-tint:#12302C; --pt2-edge:#2D6A61;
+  --lb-in:#6FD0F5; --lb-out:#F5A35C;
 }
 
 /* ---------- the header: the shelf's own colours, never the other labs' green ---------- */
@@ -145,9 +150,11 @@ svg .lb__lead,svg .lb__halo{vector-effect:non-scaling-stroke}
 .xcard__h:hover{border-color:var(--accent)}
 .xcard__h:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .xcard__t{flex:1;min-width:0}
-/* a box beyond the syllabus, in its place among the cards: grey and dashed, its word in the one extension violet */
-.exam-list > li.xcard--beyond .xcard__h,.exam-list > li.xcard--beyond.is-open .xcard__h{background:var(--card-2);border:1px dashed var(--ext-rule);color:var(--ink)}
-.exam-list > li.xcard--beyond .xcard__b{background:var(--card-2);border:1px dashed var(--ext-rule);border-top:0}
+/* a box beyond the syllabus, in its place among the cards: the one extension violet behind it, dashed (Daniel, 25 Nov 2026: "color the background in
+   purple, since this is beyond the syllabus"; it was grey); its word in a white pill so it still stands out on the violet */
+.exam-list > li.xcard--beyond .xcard__h,.exam-list > li.xcard--beyond.is-open .xcard__h{background:var(--ext-tint);border:1px dashed var(--ext-rule);color:var(--ink)}
+.exam-list > li.xcard--beyond .xcard__b{background:var(--ext-tint);border:1px dashed var(--ext-rule);border-top:0}
+.xcard--beyond .tier--ext{background:var(--card)}
 .xcard--beyond .tier{flex:none}
 .exam-eq{display:block;margin-top:6px;padding:6px 10px;border-radius:6px;background:var(--card);font-weight:600;font-size:15px;letter-spacing:.01em;overflow-wrap:anywhere}
 .kw-also{margin-top:14px;padding-top:12px;border-top:1px solid var(--edge)}
@@ -622,11 +629,14 @@ html[data-lab-tab="do"] .viewcol #viewHost .lb{display:none}
 .lbv__bung{fill:#8E6F52;stroke:#5C4632;stroke-width:1}
 .lbv__mouth{fill:var(--card-2);stroke:var(--col-ink);stroke-width:2}
 .lbv__s{font-family:var(--font);font-size:15px;font-weight:600;fill:var(--col-ink)}
-.lbv__big{font-family:var(--font);font-size:26px;font-weight:700;fill:var(--ink)}
+.lbv__air{font-family:var(--font);font-size:19px;font-weight:700}
+.lbv__in{fill:var(--lb-in)}
+.lbv__out{fill:var(--lb-out)}
 .lbv__bub{fill:#fff;stroke:#7FB4CC;stroke-width:1}
 .lbv__a{fill:#F2F5F7;stroke:#2B3A48;stroke-width:1}
 .lbv__a--o{fill:#FFA94D;stroke:#7A4300}
-.lbv__say{margin:0;min-height:2.7em;text-align:center;font-size:14px;line-height:1.35;color:var(--col-ink)}
+/* flex:none: a longer line makes the picture give way, never the words (a 320 px phone wraps some lines to three) */
+.lbv__say{flex:none;margin:0;min-height:2.7em;text-align:center;font-size:14px;line-height:1.35;color:var(--col-ink)}
 .lbv__bar{display:flex;flex-wrap:wrap;gap:7px;justify-content:center}
 .lbv__go{font:inherit;font-size:14px;font-weight:700;padding:8px 18px;border-radius:var(--r-pill);border:2px solid #0B6A8C;background:#0B6A8C;color:#fff;cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none}
 .lbv__go--out{border-color:#B5530F;background:#B5530F}

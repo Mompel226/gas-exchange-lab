@@ -7,7 +7,7 @@
 [![Open the lab](https://img.shields.io/badge/▶_Open_the_lab-0969DA?style=for-the-badge&logoColor=white)](https://nlcsbiology.com/gas-exchange-lab/)
 
 ![8 stations](https://img.shields.io/badge/8-stations-0C6E63)
-![60 questions](https://img.shields.io/badge/60-questions-8A5A0E)
+![61 questions](https://img.shields.io/badge/61-questions-8A5A0E)
 ![Marks itself](https://img.shields.io/badge/questions-mark_themselves-0B6A8C)
 ![No sign-up](https://img.shields.io/badge/students-no_sign--up_needed-6FA287)
 
@@ -28,7 +28,7 @@ in its order and in its words. Then the questions say right or wrong, never the 
 |  |  |
 |---|---|
 | 🫁 **8 stations** | the breathing system · the gas exchange surface · inspired and expired air · testing air with limewater · breathing in and out · physical activity and breathing · protecting the breathing system · your breathing-rate investigation |
-| ✍️ **60 questions** | fill the gaps · multiple choice · put in order · match up · sort into groups · tick a grid · drag the words · press the part on a drawing |
+| ✍️ **61 questions** | fill the gaps · multiple choice · put in order · match up · sort into groups · tick a grid · drag the words · press the part on a drawing |
 | 🦴 **A real chest in 3D** | the ribs, the external and internal intercostal muscles, the diaphragm, the lungs and the airways of one real body. Turn it, and take off each layer to see what lies under it |
 | 🌬️ **Breathe with your finger** | hold a button and the chest breathes in; hold the other and it breathes out hard. Look at the whole chest, the diaphragm or the rib muscles: the muscle fibres become shorter as they contract, beside the white tendon that does not, and the volume, the pressure and the air follow |
 | 🫧 **Gases diffusing across the wall** | the blood keeps flowing while oxygen and carbon dioxide molecules move across the wall of an alveolus in both directions, drawn to scale, with the net movement of each gas |
