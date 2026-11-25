@@ -156,6 +156,8 @@ svg .lb__lead,svg .lb__halo{vector-effect:non-scaling-stroke}
 .exam-list > li.xcard--beyond .xcard__b{background:var(--ext-tint);border:1px dashed var(--ext-rule);border-top:0}
 .xcard--beyond .tier--ext{background:var(--card)}
 .xcard--beyond .tier{flex:none}
+/* a picture under a line of a box (the medulla oblongata, the carotid bodies): its names stay readable, and it does not fill a wide screen */
+.exam-list li.xcard .exam-steps .photo{max-width:440px;margin:8px 0 6px}   /* beats .exam-list li.xcard .photo's 100 % */
 .exam-eq{display:block;margin-top:6px;padding:6px 10px;border-radius:6px;background:var(--card);font-weight:600;font-size:15px;letter-spacing:.01em;overflow-wrap:anywhere}
 .kw-also{margin-top:14px;padding-top:12px;border-top:1px solid var(--edge)}
 .kw-also__h{font-weight:700;font-size:15px;margin-bottom:2px}

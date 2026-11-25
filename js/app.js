@@ -537,6 +537,12 @@
              hepatic portal vein "brings blood from the small intestine", but it is the mesenteric vein that does) */
           if (typeof x === 'object' && x.note) s2.insertAdjacentHTML('beforeend', '<span class="exam-inote"><span class="sup sup--ext">extension</span> ' + M(x.note) + '</span>');
           if (typeof x === 'object' && x.eq) s2.insertAdjacentHTML('beforeend', '<span class="exam-eq">' + esc(x.eq) + '</span>');
+          /* a picture under its line (Daniel, 25 Nov 2026: "add some images ... so the students understand what it is and where it's
+             located"): the shared photo widget, so it shows its credit and opens full size on a press; the build checks its files */
+          if (typeof x === 'object' && x.img && window.Learn) {
+            var xp = window.Learn.widget({ type: 'photo', img: x.img, alt: x.alt || '', cap: x.cap || '', credit: x.credit || '', url: x.url || '' }, WIDGET_CTX);
+            if (xp) s2.appendChild(xp);
+          }
           if (typeof x === 'object' && x.group) s2.setAttribute('data-group', [].concat(x.group).join(' '));
           ol.appendChild(s2);
         });
