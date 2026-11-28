@@ -23,12 +23,13 @@
   function up(x, y) { return [y, LW - x]; }
   var WIN = { x0: 0, x1: LH - 26, y0: 13, y1: 414 };
 
+  /* IB lines at the depth of the IB guide (Daniel, 27 Nov 2026: "the IB requires a little bit more"; "ask the other conversations to deepen the IB comments"), each saying only what its statement asks (memory ib-lines-words-against-the-guide): step 1 C3.2.2 */
   var STEPS = [
-    { t: 0, h: 'The lining of the trachea', p: [['ig', 'This is the wall of the **trachea**, seen from the side. The air is on the left. **Ciliated cells** and **goblet cells** form the lining of the trachea.']] },
-    { t: 3.2, h: 'Goblet cells secrete mucus', p: [['ig', '**Goblet cells** **secrete mucus**. The sticky mucus spreads over the cilia as a layer.']] },
-    { t: 8, h: 'The mucus traps pathogens and particles', p: [['ig', '**Pathogens** and **particles**, such as dust, in the air you breathe in stick to the mucus: the mucus **traps** them.']] },
-    { t: 12.6, h: 'The cilia beat', p: [['ig', 'The **cilia beat** and **move the mucus**, with the trapped pathogens and particles, **up the airway**, away from the lungs. The cilia do not touch the particles.']] },
-    { t: 17.6, h: 'To the throat', p: [['ig', 'The mucus reaches the **throat**, where it is **swallowed**. The pathogens and particles do not reach the alveoli.']] }
+    { t: 0, h: 'The lining of the trachea', p: [['ig', 'This is the wall of the **trachea**, seen from the side. The air is on the left. **Ciliated cells** and **goblet cells** form the lining of the trachea.'], ['ib', 'The lining of the trachea is a **mucous membrane**. In IB Biology, the skin and the mucous membranes are the **primary defence** of the body against pathogens: a barrier that stops most pathogens before the pathogens enter the tissues. The skin is both a **physical barrier** and a **chemical barrier** to pathogens.']] },
+    { t: 3.2, h: 'Goblet cells secrete mucus', p: [['ig', '**Goblet cells** **secrete mucus**.', 'card'], ['ig', 'The sticky mucus spreads over the cilia as a layer.']] },
+    { t: 8, h: 'The mucus traps pathogens and particles', p: [['ig', '**Pathogens** and **particles**, such as dust, in the air you breathe in stick to the mucus: the mucus **traps** them.', 'card']] },
+    { t: 12.6, h: 'The cilia beat', p: [['ig', 'The **cilia beat** and **move the mucus**, with the trapped pathogens and particles, **up the airway**, away from the lungs.', 'card'], ['ig', 'The cilia do not touch the particles.']] },
+    { t: 17.6, h: 'To the throat', p: [['ig', 'The mucus reaches the **throat**, where it is **swallowed**.', 'card'], ['ig', 'The pathogens and particles do not reach the alveoli.']] }
   ];
   var M = [0, 3.2, 8, 12.6, 17.6, 23];
   var MOTION = { 'Mucus and cilia at work': [3.2, 4.8, 4.6, 5, 5.4] };
@@ -171,7 +172,7 @@
       var items = L.stillItems(still, itemsAt, itemsAt(tt), tt, memo, narrow + '|' + (lay ? lay.f : 0));
       gLab.innerHTML = K.names(lay, items, narrow, key, { trap: 2 }, 14);
     }
-    var sp = L.stepper({ steps: K.readerSteps(STEPS, TL.R), end: TL.end, render: draw, flow: TL.flow, stills: K.stillsOf(STEPS, TL) });
+    var CS = K.withCards(STEPS, spec.cards), sp = L.stepper({ steps: K.readerSteps(CS, TL.R), end: TL.end, render: draw, flow: TL.flow, stills: K.stillsOf(CS, TL) });
     return K.mount(S0, sp, 'lg', [], function (Dw, nar) {
       narrow = nar;
       var m = K.margins(nar, 15, 13, 118, 100);

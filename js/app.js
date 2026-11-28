@@ -461,9 +461,53 @@
       return out;
     }
     var partName = null;
+    var SUP = '<span class="sup tip" tabindex="0" data-tip="Supplement: examined on the Extended papers (2 and 4). Learn it too.">S</span>';
+
+    /* One place for each idea (Daniel, 27 Nov 2026, of the Molecules Lab, then for every lab: a station's animation and the
+       cards under it said the same things one by one; "the different stages are actually what you click … you're not
+       removing information necessarily, you're just kind of merging everything within the animation button"; "this makes
+       sense for those that clearly repeat the information. There are others that add extra things. For those, it doesn't
+       make sense"). A sentence of What you need to know marked `inFilm: '<film type>'` is not drawn as a card: its words
+       become that film's step `step` (or, `step` a list, its sentences become one step each, in order), marked as a card's
+       are, with its key words' ↓ and its Supplement badge; `title`: the step takes the card's heading (WKit.withCards puts
+       them in). The master keeps the sentence where it was, so its place, group and tags do not move; a press on its part
+       in the picture lights the part and opens no other card (openGroup, MERGED). A card that adds what the animation does
+       not show stays a card */
+    var merged = {};
+    MERGED = {};
+    (st.learn.exam || []).forEach(function (b, i) {
+      if (!b || typeof b !== 'object' || !b.inFilm || offOf(b, i)) return;
+      merged[i] = b;
+      [].concat(b.group || []).forEach(function (g) { MERGED[g] = true; });
+    });
+    function sentences(t) { return String(t).replace(/([.!?])\s+(?=[A-Z_])/g, '$1\u0001').split('\u0001'); }
+    CARDS_FOR = function (type) {
+      var out = null;
+      Object.keys(merged).forEach(function (i) {
+        var b = merged[i]; if (b.inFilm !== type) return;
+        var many = Array.isArray(b.step), parts = many ? sentences(b.text) : [b.text], at = many ? b.step : [b.step];
+        if (!out) { out = {}; if (window.Terms && Terms.freshCard) Terms.freshCard(); }   /* read on its own, as a card is */
+        /* a card's sentences for one step are one line of that step (one IGCSE mark, not one a sentence) */
+        var by = {}, ks = [];
+        parts.forEach(function (t, j) { var k = at[j]; if (k == null) return; if (!by[k]) { by[k] = []; ks.push(k); } by[k].push(t); });
+        ks.forEach(function (k) {
+          var c = out[k] || (out[k] = { html: [] });
+          if (window.Terms && Terms.teach) Terms.teach(true);
+          c.html.push((b.sup ? SUP : '') + M(by[k].join(' ')));
+          if (window.Terms && Terms.teach) Terms.teach(false);
+          if (b.title && !many) c.head = b.head;
+        });
+      });
+      return out;
+    };
 
     examInOrder(st.learn.exam || []).forEach(function (pair) {
       var b = pair[0], i = pair[1];
+      /* merged into its film: only the film cards anchored here are drawn */
+      if (merged[i]) {
+        filmsAt(widgets, 'before', i).concat(filmsAt(widgets, 'after', i)).forEach(function (g) { list.appendChild(filmCard(g)); });
+        return;
+      }
       var offK = offOf(b, i);
       /* sentences that belong to a named part — "Setting it up" — sit together in their own block */
       var part = (typeof b === 'object' && b.part) || null;
@@ -491,7 +535,7 @@
         out.forEach(fn);
       }
       var badge = '';
-      if (typeof b === 'object' && b.sup) badge = '<span class="sup tip" tabindex="0" data-tip="Supplement: examined on the Extended papers (2 and 4). Learn it too.">S</span>';
+      if (typeof b === 'object' && b.sup) badge = SUP;
       /* in an older 0610 syllabus: its badge names that syllabus; beyond the syllabus: no badge, its heading says so */
       var pe = st.past && st.past.exam ? st.past.exam[i] : null;
       if (pe != null) badge = pastBadge(pe);
@@ -1100,7 +1144,9 @@
     }
     if (window.Plate) window.Plate.focus(gid);
     history.replaceState(null, '', '#' + gid);
-    var target = dest ? document.querySelector('#panelInner [data-group~="' + gid + '"]') : null;
+    /* a part whose card is now a step of an animation (inFilm) lights in the picture and opens no other card: the box
+       "Bronchus or bronchiole?" shares the part of the bronchi (one place for each idea, 27 Nov 2026) */
+    var target = dest && !MERGED[gid] ? document.querySelector('#panelInner [data-group~="' + gid + '"]') : null;
     if (target && target.__open) target.__open(true, true);
     if (target && !stay) {
       landOn(target, true);
@@ -1126,9 +1172,12 @@
     });
     return out;
   }
+  var CARDS_FOR = null, MERGED = {};   /* paintLearn's: the sentence cards merged into a film, by its type; their parts */
   function filmCard(ws) {
     var li = document.createElement('li'), title = '', n = 0, twins = 0;
     ws.forEach(function (w) {
+      var cs = CARDS_FOR && w.film ? CARDS_FOR(w.type) : null;
+      if (cs) { var w2 = {}; for (var k in w) w2[k] = w[k]; w2.cards = cs; w = w2; }
       var el = window.Learn.widget(w, WIDGET_CTX);
       if (!el) return;
       if (w.anchor && el.setAttribute) el.setAttribute('data-anchor', w.anchor);

@@ -52,11 +52,13 @@
   /* A step's words in parts, each marked with its level (Daniel, 8 Nov 2026: "make sure that in the step message that you
      show, exactly what is IGCSE and what is IB and what is beyond … It needs to be very, very clear"): p is a string, or
      [[lv, text], …] with lv 'ig' (in the 0610 syllabus: learn it), 'ib' (not in the 0610 syllabus; in IB Biology),
-     'ibhl' (the same, IB Higher Level only) or 'bey' (in neither syllabus) */
+     'ibhl' (the same, IB Higher Level only) or 'bey' (in neither syllabus). [lv, text, 'html']: a sentence card's words
+     merged into the step (WKit.withCards), already marked by app.js as the card's were, its key words' links included:
+     drawn as they are */
   var LV = { ig: 'IGCSE', ib: 'IB', ibhl: 'IB HL', bey: 'Beyond' };
   function stepWords(p) {
     if (!Array.isArray(p)) return stepText(p);
-    return p.map(function (q) { return '<span class="sp__lv sp__lv--' + q[0] + '"><b class="sp__lvt">' + LV[q[0]] + '</b> ' + stepText(q[1]) + '</span>'; }).join('');
+    return p.map(function (q) { return '<span class="sp__lv sp__lv--' + q[0] + '"><b class="sp__lvt">' + LV[q[0]] + '</b> ' + (q[2] === 'html' ? q[1] : stepText(q[1])) + '</span>'; }).join('');
   }
   function stepper(opts) {
     var STEPS = opts.steps, END = opts.end, render = opts.render;

@@ -38,12 +38,13 @@
     return P[P.length - 1];
   }
   var ROUTE = VEIN.concat(LUNG, ARTERY);
+  /* IB lines at the depth of the IB guide (Daniel, 27 Nov 2026: "the IB requires a little bit more"; "ask the other conversations to deepen the IB comments"), each saying only what its statement asks (memory ib-lines-words-against-the-guide): steps 2 to 5 C3.1.15, with C3.1.14 for where the chemoreceptors are (all SL and HL) */
   var STEPS = [
-    { t: 0, h: 'Active muscles respire more', p: [['ig', 'During physical activity the **muscles contract more**, so the muscles need more energy. The muscles **respire** more to release this energy, and the muscles **produce more carbon dioxide**.']] },
-    { t: 4.6, h: 'More carbon dioxide in the blood', p: [['ig', 'The carbon dioxide diffuses into the blood. The **carbon dioxide concentration in the blood increases**, and the blood carries it round the body.']] },
-    { t: 9.8, h: 'The brain detects the carbon dioxide', p: [['ig', 'The increased carbon dioxide concentration in the blood is **detected by the brain**.'], ['ib', 'Carbon dioxide lowers the **pH** of the blood and of the fluid around the brain cells. Cells called **chemoreceptors** detect this change. The main chemoreceptors are in the **medulla oblongata**, in the **brainstem** at the base of the brain. Others are beside the carotid arteries and the aorta.']] },
-    { t: 13, h: 'Impulses to the breathing muscles', p: [['ig', 'The brain sends more electrical signals along nerves to the **diaphragm** and the **intercostal muscles**. These signals are **impulses**. The diaphragm and the intercostal muscles contract **faster** and **more strongly**.']] },
-    { t: 18, h: 'A greater rate and depth of breathing', p: [['ig', 'The **rate** and the **depth** of breathing **increase**. More carbon dioxide is removed from the blood, and more oxygen is supplied to the muscles.']] }
+    { t: 0, h: 'Active muscles respire more', p: [['ig', 'During physical activity the **muscles contract more**, so the muscles need more energy. The muscles **respire** more to release this energy, and the muscles **produce more carbon dioxide**.', 'card']] },
+    { t: 4.6, h: 'More carbon dioxide in the blood', p: [['ig', 'The carbon dioxide diffuses into the blood.'], ['ig', 'The **carbon dioxide concentration in the blood increases**.', 'card'], ['ig', 'The blood carries the carbon dioxide round the body.'], ['ib', 'In the blood, carbon dioxide reacts with water and forms **carbonic acid**, which releases **hydrogen ions** (H⁺). So the more carbon dioxide the blood carries, the lower the **pH** of the blood. During vigorous physical activity, the active muscles also release hydrogen ions into the blood.']] },
+    { t: 9.8, h: 'The brain detects the carbon dioxide', p: [['ig', 'The increased carbon dioxide concentration in the blood is **detected by the brain**.', 'card'], ['ib', 'The decrease in **pH** is monitored by **chemoreceptors**. The main chemoreceptors are in the **brainstem**, in the **medulla oblongata**. Other chemoreceptors, on the carotid arteries and the aorta, monitor the pH of the blood and its concentrations of oxygen and carbon dioxide. The medulla oblongata **coordinates** the response.']] },
+    { t: 13, h: 'Impulses to the breathing muscles', p: [['ig', 'The brain sends more electrical signals along nerves to the **diaphragm** and the **intercostal muscles**. These signals are **impulses**. The diaphragm and the intercostal muscles contract **faster** and **more strongly**.', 'card'], ['ib', 'The **medulla oblongata** sends these impulses along **motor neurons**. By changing the signals to the diaphragm and the intercostal muscles, the medulla oblongata controls the **ventilation rate**.']] },
+    { t: 18, h: 'A greater rate and depth of breathing', p: [['ig', 'The **rate** and the **depth** of breathing **increase**. More carbon dioxide is removed from the blood, and more oxygen is supplied to the muscles.', 'card'], ['ib', 'The control of the ventilation rate is an example of **negative feedback**. Faster and deeper ventilation removes carbon dioxide from the blood faster, so the pH of the blood returns towards its normal value, and the chemoreceptors send fewer impulses to the medulla oblongata.']] }
   ];
   var M = [0, 4.6, 9.8, 13, 18, 24.4];
   var MOTION = { 'From active muscles to deeper breathing': [4.6, 5.2, 3.2, 5, 6.4] };
@@ -149,7 +150,7 @@
       var items = L.stillItems(still, itemsAt, itemsAt(tt), tt, memo, narrow + '|' + (lay ? lay.f : 0));
       gLab.innerHTML = K.names(lay, items, narrow, key, null, 14);
     }
-    var sp = L.stepper({ steps: K.readerSteps(STEPS, TL.R), end: TL.end, render: draw, flow: TL.flow, stills: K.stillsOf(STEPS, TL) });
+    var CS = K.withCards(STEPS, spec.cards), sp = L.stepper({ steps: K.readerSteps(CS, TL.R), end: TL.end, render: draw, flow: TL.flow, stills: K.stillsOf(CS, TL) });
     return K.mount(S, sp, 'ac', [], function (Dw, nar) {
       narrow = nar;
       var m = K.margins(nar, 15, 14, 120, 110);

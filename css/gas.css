@@ -2,6 +2,7 @@
   --accent:#0B6A8C; --accent-2:#0C7BA3; --accent-tint:#E1F1F8;
   --c12:rgba(255,255,255,.12);   /* the number on the open station's pill: white on it stays above 4.5 : 1 */
     --k-struct:#1B7A43; --k-proc:#B5530F; --k-subst:#B4285F;
+    --k-struct-t:#1A7842; --k-proc-t:#AA4E0E;   /* the same inks on a tint (a step's level line, a box beyond the syllabus): AA there too (27 Nov 2026) */
   --on-photo-veil:rgba(14,20,27,.40);
     --im-plasma:#FCEFEA; --im-plasma-edge:#F2D4CA; --im-mem:#B45309;
   --tw-v:#E3A90B; --tw-s:#2F6DB5; --tw-i:#C8322F; --tw-r:#9AA6B2;
@@ -17,7 +18,7 @@
 @media (prefers-color-scheme: dark){
 :root:not([data-theme="light"]){
   --accent:#6FD0F5; --accent-2:#4FC3F7; --accent-tint:#10303F;
-  --k-struct:#6EDB9A; --k-proc:#F5A35C; --k-subst:#F48FB4;
+  --k-struct:#6EDB9A; --k-proc:#F5A35C; --k-subst:#F48FB4; --k-struct-t:#6EDB9A; --k-proc-t:#F5A35C;
   --im-plasma:#2A2124; --im-plasma-edge:#4A3438; --im-mem:#F2B544;
   --tw-v:#F2C230; --tw-s:#6FA8EC; --tw-i:#F06A5E; --tw-r:#76828F;
   --rt-bg:#16202A; --rt-path:#9AA8B5; --rt-shut:#F06A5E; --rt-ill:#F06A5E; --rt-well:#6FA8EC;
@@ -28,7 +29,7 @@
 }
 :root[data-theme="dark"]{
   --accent:#6FD0F5; --accent-2:#4FC3F7; --accent-tint:#10303F;
-  --k-struct:#6EDB9A; --k-proc:#F5A35C; --k-subst:#F48FB4;
+  --k-struct:#6EDB9A; --k-proc:#F5A35C; --k-subst:#F48FB4; --k-struct-t:#6EDB9A; --k-proc-t:#F5A35C;
   --im-plasma:#2A2124; --im-plasma-edge:#4A3438; --im-mem:#F2B544;
   --tw-v:#F2C230; --tw-s:#6FA8EC; --tw-i:#F06A5E; --tw-r:#76828F;
   --rt-bg:#16202A; --rt-path:#9AA8B5; --rt-shut:#F06A5E; --rt-ill:#F06A5E; --rt-well:#6FA8EC;
@@ -234,6 +235,7 @@ svg .lb__lead,svg .lb__halo{vector-effect:non-scaling-stroke}
 
 /* the inks of this lab (js/terms.js) */
 .t--struct{color:var(--k-struct)} .t--proc{color:var(--k-proc)} .t--subst{color:var(--k-subst)}
+.sp__lv .t--struct,.xcard--beyond .t--struct{color:var(--k-struct-t)} .sp__lv .t--proc,.xcard--beyond .t--proc{color:var(--k-proc-t)}
 .chip--struct{background:var(--k-struct);color:var(--on-ink)} .chip--proc{background:var(--k-proc);color:var(--on-ink)}
 .chip--subst{background:var(--k-subst);color:var(--on-ink)}
 

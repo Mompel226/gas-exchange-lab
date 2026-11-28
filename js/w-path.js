@@ -67,11 +67,11 @@
   })();
   var STEPS = [
     { t: 0, h: 'In through the nose or the mouth', p: [['ig', 'Air enters through the **nose** or the **mouth**. The two ways join at the back of the throat.']] },
-    { t: 4, h: 'The larynx', p: [['ig', 'Air passes through the **larynx**. The larynx contains the vocal cords, which make sounds.']] },
-    { t: 7.4, h: 'The trachea', p: [['ig', 'From the larynx, air passes down a wide tube, the **trachea**. **Rings of cartilage** in the wall keep the trachea open.']] },
-    { t: 11, h: 'The two bronchi', p: [['ig', 'The trachea divides into two **bronchi**. One **bronchus** carries air into each lung.']] },
-    { t: 14.4, h: 'The bronchioles', p: [['ig', 'Inside each lung the bronchi divide again and again into smaller tubes, the **bronchioles**.']] },
-    { t: 19, h: 'The alveoli', p: [['ig', 'Each bronchiole ends in tiny air sacs, the **alveoli**. A network of **capillaries** surrounds them. Here, gases are exchanged with the blood.']] }
+    { t: 4, h: 'The larynx', p: [['ig', 'Air passes through the **larynx**. The larynx contains the vocal cords, which make sounds.', 'card']] },
+    { t: 7.4, h: 'The trachea', p: [['ig', 'From the larynx, air passes down a wide tube, the **trachea**. **Rings of cartilage** in the wall keep the trachea open.', 'card']] },
+    { t: 11, h: 'The two bronchi', p: [['ig', 'The trachea divides into two **bronchi**. One **bronchus** carries air into each lung.', 'card']] },
+    { t: 14.4, h: 'The bronchioles', p: [['ig', 'Inside each lung the bronchi divide again and again into smaller tubes, the **bronchioles**.', 'card']] },
+    { t: 19, h: 'The alveoli', p: [['ig', 'Each bronchiole ends in tiny air sacs, the **alveoli**. A network of **capillaries** surrounds them. Here, gases are exchanged with the blood.', 'card']] }
   ];
   var M = [0, 4, 7.4, 11, 14.4, 19, 25];
   var MOTION = { 'Follow a breath of air': [3.8, 3.2, 3.4, 3.2, 4.2, 6] };
@@ -200,7 +200,7 @@
       var items = L.stillItems(still, itemsAt, itemsAt(tt), tt, memo, narrow + '|' + (lay ? lay.f : 0));
       gLab.innerHTML = K.names(lay, items, narrow, key, null, 14);
     }
-    var sp = L.stepper({ steps: K.readerSteps(STEPS, R), end: TL.end, render: draw, flow: TL.flow, stills: K.stillsOf(STEPS, TL) });
+    var CS = K.withCards(STEPS, spec.cards), sp = L.stepper({ steps: K.readerSteps(CS, R), end: TL.end, render: draw, flow: TL.flow, stills: K.stillsOf(CS, TL) });
     return K.mount(S, sp, 'ap', [], function (Dw, nar) {
       narrow = nar;
       var m = K.margins(nar, 13, 13, 110, 110);

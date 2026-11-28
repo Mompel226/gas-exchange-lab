@@ -278,7 +278,31 @@
   }
 
 
+  /* One place for each idea (Daniel, 27 Nov 2026, of the Molecules Lab, then for every lab: "you're not removing information
+     necessarily, you're just kind of merging everything within the animation button"; app.js `inFilm`). A sentence card
+     that only repeated a step is merged into it: cards[i] = { html: [its words, marked as a card's are], head? }. Each of
+     the step's own lines marked 'card' (the words a card says) gives its place to the next card's words, the last one to
+     all that remain; with no such line they come first. The step's other lines stay, because they add to the card; with
+     `head` the step takes the card's heading. Without cards a film keeps every line of its own, its 'card' lines too */
+  function withCards(steps, cards) {
+    if (!cards) return steps;
+    return steps.map(function (st, i) {
+      var c = cards[i]; if (!c) return st;
+      var o = {}, k, mine = c.html.map(function (x) { return ['ig', x, 'html']; }), p = Array.isArray(st.p) ? st.p : [['ig', st.p]];
+      var slots = p.filter(function (q) { return q[2] === 'card'; }).length, used = 0, out = [];
+      p.forEach(function (q) {
+        if (q[2] !== 'card') { out.push(q); return; }
+        used++;
+        out = out.concat(used < slots ? mine.splice(0, 1) : mine.splice(0));
+      });
+      for (k in st) o[k] = st[k];
+      o.p = slots ? out : mine.concat(out);
+      if (c.head) o.h = c.head;
+      return o;
+    });
+  }
+
   global.WKit = { world: world, rbcDefs: rbcDefs, rbc: rbc, pinKey: pinKey, names: names, margins: margins, n1: n1, seg: seg, ease: ease, clamp01: clamp01, lerp: lerp, len: len, rng: rng, fitType: fitType,
                   timeline: timeline, readerSteps: readerSteps, stillsOf: stillsOf, itemsOf: itemsOf, frameOf: frameOf, drawLabels: drawLabels, shell: shell,
-                  mount: mount, NS: NS };
+                  mount: mount, withCards: withCards, NS: NS };
 })(window);

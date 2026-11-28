@@ -21,8 +21,10 @@ by **Dr Daniel Mompel Riera**
 
 ## What a student does
 
-Each station has its own picture on the left and short cards on the right that open one at a time. Press a part of the
-picture and its card opens; open a card and its part shows in the picture. The stations follow the T11 revision summary,
+Each station has its own picture on the left and, on the right, short cards and animations that open one at a time. Press
+a part of the picture to light it, with its card when it has one; open a card and its part shows in the picture. An
+animation shows a process one step at a time, and each step holds the sentence to learn, so nothing is said twice. The
+stations follow the T11 revision summary,
 in its order and in its words. Then the questions say right or wrong, never the answer.
 
 |  |  |

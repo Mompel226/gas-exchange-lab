@@ -56,12 +56,13 @@
 
   /* ================================================================== 1. a large surface area ================== */
   var SA_TITLE = 'A large surface area: from one alveolus to both lungs';
+  /* IB lines at the depth of the IB guide (Daniel, 27 Nov 2026: "the IB requires a little bit more"; "ask the other conversations to deepen the IB comments"), each saying only what its statement asks (memory ib-lines-words-against-the-guide): step 3 B3.1.4 (branched bronchioles), step 5 B3.1.1 and B3.1.4 (high surface area) */
   var SA_STEPS = [
     { t: 0, h: 'One alveolus', p: [['ig', 'This is **one alveolus**, a tiny air sac. Gases diffuse across its wall.']] },
     { t: 3.6, h: 'A cluster of alveoli', p: [['ig', 'The alveoli are packed together in small groups, called **clusters**. Each alveolus adds its own wall to the surface for gas exchange.'], ['bey', 'A cluster of alveoli is an **alveolar sac**.']] },
-    { t: 8.2, h: 'Clusters on every bronchiole', p: [['ig', 'Each **bronchiole** divides and ends in **many clusters**. This drawing shows only one small branch.']] },
-    { t: 12.2, h: 'Millions of alveoli', p: [['ig', 'Every bronchiole in the two lungs ends like this, so the lungs contain **millions of alveoli**.'], ['bey', 'An adult has about **480 million** alveoli. This number is not in the syllabus.']] },
-    { t: 18.4, h: 'A very large surface area', p: [['ig', 'So the **total surface area** is **very large**, and the **rate of diffusion** is high.'], ['bey', 'If you spread the walls of all the alveoli flat, the walls cover about **130 m²**. This is about half a tennis court. Your skin is about 2 m². These numbers are not in the syllabus.']] }
+    { t: 8.2, h: 'Clusters on every bronchiole', p: [['ig', 'Each **bronchiole** divides and ends in **many clusters**. This drawing shows only one small branch.'], ['ib', 'A **branched network of bronchioles** is an adaptation of the lungs for gas exchange: the branches carry air to millions of alveoli, in every part of both lungs.']] },
+    { t: 12.2, h: 'Millions of alveoli', p: [['ig', 'Every bronchiole in the two lungs ends like this.'], ['ig', 'So the lungs contain **millions of alveoli**.', 'card'], ['bey', 'An adult has about **480 million** alveoli. This number is not in the syllabus.']] },
+    { t: 18.4, h: 'A very large surface area', p: [['ig', 'So the **total surface area** is **very large**, and the **rate of diffusion** is high.', 'card'], ['ib', 'Gas exchange is a **vital function** in all organisms, and the challenges become greater as an organism becomes larger: its **surface area-to-volume ratio** decreases, and the distance from its centre to its outside increases. The surface of a large body cannot exchange gases fast enough for all its cells, so the body needs a gas-exchange organ with a very **high surface area**, such as the alveolar lungs of a mammal.'], ['bey', 'If you spread the walls of all the alveoli flat, the walls cover about **130 m²**. This is about half a tennis court. Your skin is about 2 m². These numbers are not in the syllabus.']] }
   ];
   var SA_M = [0, 3.6, 8.2, 12.2, 18.4, 24.4];
   var SA_MOTION = { 'A large surface area: from one alveolus to both lungs': [3.4, 4, 3.6, 5.8, 4.2] };
@@ -170,16 +171,17 @@
       gLive.innerHTML = o;
       names(T, itemsAt, tt, still);
     }
-    var sp = L.stepper({ steps: K.readerSteps(SA_STEPS, R), end: TL.end, render: draw, flow: TL.flow, stills: K.stillsOf(SA_STEPS, TL) });
+    var CS = K.withCards(SA_STEPS, spec.cards), sp = L.stepper({ steps: K.readerSteps(CS, R), end: TL.end, render: draw, flow: TL.flow, stills: K.stillsOf(CS, TL) });
     return K.mount(S, sp, 'sa', [['The lungs in step 4 show how crowded the alveoli are. They are not a count: real alveoli are far smaller.']], layout(S, T));
   }
   L.add('manyalv', manyalv);
 
   /* ================================================================== 2. a thin surface ======================== */
   var TW_TITLE = 'A thin surface: a short diffusion distance';
+  /* IB lines at the depth of the IB guide (Daniel, 27 Nov 2026: "the IB requires a little bit more"; "ask the other conversations to deepen the IB comments"), each saying only what its statement asks (memory ib-lines-words-against-the-guide): step 1 B2.3.8 (HL) */
   var TW_STEPS = [
-    { t: 0, h: 'Two thin walls', p: [['ig', 'Between the air and the blood there are only **two walls**: the wall of the **alveolus** and the wall of the **capillary**. Each wall is **one cell thick**.']] },
-    { t: 4.2, h: 'A short diffusion distance', p: [['ig', 'The path across the two walls is the **diffusion distance**. The diffusion distance is very **short**.'], ['bey', 'The diffusion distance is about 1 µm. A red blood cell is about 7.5 µm across. These numbers are not in the syllabus.']] },
+    { t: 0, h: 'Two thin walls', p: [['ig', 'Between the air and the blood there are only **two walls**: the wall of the **alveolus** and the wall of the **capillary**. Each wall is **one cell thick**.'], ['ibhl', 'The wall of an alveolus is an **epithelium** with two types of cell. **Type I pneumocytes** are extremely thin, so the distance for diffusion is short. **Type II pneumocytes** contain many vesicles (**lamellar bodies**) that discharge **surfactant** into the alveolus. The tissue needs more than one type of cell because its function needs different adaptations.']] },
+    { t: 4.2, h: 'A short diffusion distance', p: [['ig', 'The path across the two walls is the **diffusion distance**.'], ['ig', 'The diffusion distance is very **short**.', 'card'], ['bey', 'The diffusion distance is about 1 µm. A red blood cell is about 7.5 µm across. These numbers are not in the syllabus.']] },
     { t: 9.4, h: 'A thin surface and a thick surface', p: [['ig', 'Compare a **thin** surface with a **thick** one, with the same concentrations of oxygen. Oxygen has a **shorter distance** to diffuse across the thin surface, so **more oxygen diffuses** in the same time.']] },
     { t: 16.4, h: 'Why a thin surface helps', p: [['ig', 'A **thin surface** gives a **short diffusion distance**, so the **rate of diffusion** is high.']] }
   ];
@@ -273,7 +275,7 @@
       showKey('o2', t >= 9.8); showKey('hb', t >= 9.8); showKey('rbc', true);
       names(T, itemsAt, tt, still);
     }
-    var sp = L.stepper({ steps: K.readerSteps(TW_STEPS, R), end: TL.end, render: draw, flow: TL.flow, stills: K.stillsOf(TW_STEPS, TL) });
+    var CS = K.withCards(TW_STEPS, spec.cards), sp = L.stepper({ steps: K.readerSteps(CS, R), end: TL.end, render: draw, flow: TL.flow, stills: K.stillsOf(CS, TL) });
     worldAt = K.world(S, sp, function () { draw(sp.time()); });
     return K.mount(S, sp, 'tw', [['In steps 1 and 2 the walls and the cells are drawn to scale, and the molecules far larger than real.']], layout(S, T));
   }
@@ -282,11 +284,11 @@
   /* ================================================================== 3. good ventilation ====================== */
   var FA_TITLE = 'Good ventilation: fresh air keeps the gradient steep';
   var FA_STEPS = [
-    { t: 0, h: 'Breathing in brings fresh air', p: [['ig', '**Ventilation** moves air into and out of the lungs. Breathing in brings **fresh air**, with a **high oxygen concentration**, into the alveolus.']] },
+    { t: 0, h: 'Breathing in brings fresh air', p: [['ig', '**Ventilation** moves air into and out of the lungs.', 'card'], ['ig', 'Breathing in brings **fresh air**, with a **high oxygen concentration**, into the alveolus.']] },
     { t: 4.6, h: 'The gases diffuse', p: [['ig', 'Oxygen **diffuses into the blood** and carbon dioxide **diffuses out of the blood**. So the air in the alveolus now has **less oxygen** and **more carbon dioxide**.']] },
     { t: 9.4, h: 'Breathing out, then in again', p: [['ig', 'Breathing out **removes part** of this air. Breathing in mixes **fresh air** with the air that stays, so the oxygen concentration **rises** and the carbon dioxide concentration **falls**.']] },
     { t: 14.2, h: 'If the air is not changed', p: [['ig', 'If no fresh air arrives, the concentration of oxygen in this air **falls** and the concentration of carbon dioxide **rises**. The **concentration gradients** become **less steep**, so diffusion becomes **slower**.']] },
-    { t: 21, h: 'Ventilation keeps the gradients steep', p: [['ig', 'Breathing brings fresh air again. **Good ventilation** keeps the **concentration gradients steep**, so the gases diffuse **quickly**.']] }
+    { t: 21, h: 'Ventilation keeps the gradients steep', p: [['ig', 'Breathing brings fresh air again.'], ['ig', '**Good ventilation** keeps the **concentration gradients steep**.', 'card'], ['ig', 'Steep concentration gradients make the gases diffuse **quickly**.']] }
   ];
   var FA_M = [0, 4.6, 9.4, 14.2, 21, 27];
   var FA_MOTION = { 'Good ventilation: fresh air keeps the gradient steep': [4.6, 4.8, 4.8, 6.8, 6] };
@@ -422,7 +424,7 @@
       showKey('o2', true); showKey('co2', true); showKey('rbc', true);
       names(T, itemsAt, tt, still);
     }
-    var sp = L.stepper({ steps: K.readerSteps(FA_STEPS, R), end: TL.end, render: draw, flow: TL.flow, stills: K.stillsOf(FA_STEPS, TL) });
+    var CS = K.withCards(FA_STEPS, spec.cards), sp = L.stepper({ steps: K.readerSteps(CS, R), end: TL.end, render: draw, flow: TL.flow, stills: K.stillsOf(CS, TL) });
     worldAt = K.world(S, sp, function () { draw(sp.time()); });
     return K.mount(S, sp, 'fa', [['A simplified picture of one alveolus. Only oxygen and carbon dioxide are drawn, and the molecules are far larger than real.']], layout(S, T));
   }
