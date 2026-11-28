@@ -253,13 +253,13 @@
       modes.forEach(function (M, j) { M.svg.style.display = j === k ? '' : 'none'; M.btn.setAttribute('aria-pressed', j === k ? 'true' : 'false'); });
       draw(modes[k]);
       note.hidden = !why; note.textContent = why || '';
-      api.say = modes[k].spec.say; api.credit = modes[k].spec.credit;
+      api.say = modes[k].spec.say; api.note = modes[k].spec.note; api.credit = modes[k].spec.credit;
       ctx.caption();
     }
     if (global.ResizeObserver) new global.ResizeObserver(function () { draw(modes[cur]); }).observe(stage);
 
     var api = {
-      el: root, say: modes[0].spec.say, credit: modes[0].spec.credit,
+      el: root, say: modes[0].spec.say, note: modes[0].spec.note, credit: modes[0].spec.credit,
       labels: (function () { var o = {}; (spec.parts || []).forEach(function (p) { o[p] = NAMES[p] || p; }); return o; })(),
       focus: function (part) {
         part = part ? cardOf(part) : null;

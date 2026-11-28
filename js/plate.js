@@ -10,7 +10,8 @@
    ctx.pick(part)   a part pressed on the picture: app.js lands on the sentence whose `group` names it
    view.focus(part) a sentence opened in the text: the picture shows that part (null: the whole view)
    view.say         the line under the picture (what you are looking at)
-   view.credit      who made the picture, under it
+   view.note        what the picture leaves out or draws to scale, under the i beside that line
+   view.credit      who made the picture, under the same i
    view.stop()      the station is left: pause anything that moves
 
    Each station's view is built once and kept, so a reader who comes back finds it as they left it.
@@ -32,11 +33,15 @@
   function init(o) {
     opts = o || {};
     col = document.querySelector('.viewcol'); host = el('viewHost'); sim = el('simHost'); said = el('said');
+    wireCaption();
   }
 
-  /* A picture made of several photographs gives `credits` ([[name, credit], …]): a folded list under the picture, never
-     words on the photographs (Daniel, 4 Nov 2026: "not on the images, because it covers the image"). It stays open while
-     the reader presses the photographs, which redraws this line. */
+  /* The caption is one line: what the picture shows (`say`). What it leaves out or draws to scale (`note`), and who made it
+     (`credit`, or `credits`, [[name, credit], …], for a picture of several photographs, never words on the photographs:
+     Daniel, 4 Nov 2026, "not on the images, because it covers the image"), wait under the i beside it (Daniel, 27 Nov 2026,
+     for every lab: "the animation is too small and there's too much text that impedes the visualization. Text should be on
+     the right"; docs/PICTURE-STANDARD.md F; the Membrane and Cells Labs' caption). It stays open while the reader presses
+     the picture, which redraws this line. */
   function caption(v) {
     if (!said) return;
     /* A 3D picture needs the whole column (Daniel, 23 Nov 2026: "the 3D space is very short ... the reference ... cuts a line"): a view with `tight`,
@@ -51,15 +56,35 @@
         note.innerHTML = '<summary aria-label="About this picture and where it comes from"><span aria-hidden="true"></span></summary><p class="pinfo__t"></p>';
         stage.appendChild(note);
       }
-      note.querySelector('.pinfo__t').innerHTML = '<span class="pinfo__say">' + (v.say || '') + '</span>' + (v.credit ? '<span class="pinfo__credit">' + v.credit + '</span>' : '');
+      note.querySelector('.pinfo__t').innerHTML = '<span class="pinfo__say">' + (v.say || '') + '</span>' + (v.note ? '<span class="pinfo__note">' + v.note + '</span>' : '') + (v.credit ? '<span class="pinfo__credit">' + v.credit + '</span>' : '');
       return;
     }
-    var was = said.querySelector('.said__fold'), open = !!(was && was.open);
+    var was = said.querySelector('.said__i'), open = !!(was && was.getAttribute('aria-expanded') === 'true');
     var list = v && v.credits && v.credits.length ? v.credits : null;
-    said.innerHTML = '<span class="said__name">' + (v && v.say ? v.say : '') + '</span>' +
-      (list ? '<details class="said__fold"' + (open ? ' open' : '') + '><summary>Credits for these photographs</summary><ul class="said__list">' +
-        list.map(function (c) { return '<li><b>' + esc(c[0]) + '</b>: ' + esc(c[1]) + '</li>'; }).join('') + '</ul></details>' :
+    var more = (v && v.note ? '<span class="said__note">' + v.note + '</span>' : '') +
+      (list ? '<span class="said__h">Credits for these photographs</span><span class="said__list">' +
+        list.map(function (c) { return '<span class="said__li"><b>' + esc(c[0]) + '</b>: ' + esc(c[1]) + '</span>'; }).join('') + '</span>' :
         v && v.credit ? '<span class="said__credit">' + v.credit + '</span>' : '');
+    said.innerHTML = '<span class="said__name">' + (v && v.say ? v.say : '') + '</span>' + (more ?
+      '<button class="said__i" type="button" aria-expanded="' + open + '" aria-controls="saidMore" aria-label="About this picture and where it comes from">i</button>' +
+      '<span class="said__more" id="saidMore" role="note"' + (open ? '' : ' hidden') + '>' + more + '</span>' : '');
+  }
+  function shutMore(back) {
+    var b = said && said.querySelector('.said__i[aria-expanded="true"]'); if (!b) return;
+    b.setAttribute('aria-expanded', 'false');
+    var m = said.querySelector('.said__more'); if (m) m.hidden = true;
+    if (back) b.focus();
+  }
+  function wireCaption() {
+    if (!said) return;
+    said.addEventListener('click', function (e) {
+      var b = e.target && e.target.closest ? e.target.closest('.said__i') : null, m = said.querySelector('.said__more');
+      if (!b || !m) return;
+      var on = b.getAttribute('aria-expanded') !== 'true';
+      b.setAttribute('aria-expanded', on ? 'true' : 'false'); m.hidden = !on;
+    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') shutMore(true); });
+    document.addEventListener('pointerdown', function (e) { if (!said.contains(e.target)) shutMore(false); });
   }
 
   function showStation(st) {
@@ -83,7 +108,7 @@
     if (current.start) current.start();
     if (current.focus) current.focus(null);
     caption(current);
-    if (col) col.setAttribute('data-kind', spec.kind);
+    if (col) { col.setAttribute('data-kind', spec.kind); col.setAttribute('data-station', st.id); }   /* the station sets the column's width: css/gas.css */
   }
 
   function focus(part) { if (current && current.focus) current.focus(part); }

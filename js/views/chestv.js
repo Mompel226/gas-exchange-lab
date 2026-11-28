@@ -49,7 +49,7 @@
       { id: 'alv', name: 'The alveoli', img: 'sv-alveoli.svg', iw: 262, ih: 380, w: 262, h: 380,
         alt: 'A drawing of a bronchiole that branches and ends in clusters of round air sacs, the alveoli. One cluster is covered with a network of red and blue capillaries.',
         pts: { bronchioles: [58, 108, 'L'], alveoli: [84, 310, 'L'], caps: [202, 326.5, 'R'] },
-        say: 'A bronchiole ends in alveoli. Capillaries surround them: one cluster is drawn with its capillaries', credit: CREDIT_S }
+        say: 'A bronchiole ends in alveoli. Capillaries surround them', note: 'Only one cluster is drawn with its capillaries.', credit: CREDIT_S }
     ]
   };
   /* what each card lights in the real chest */
@@ -62,7 +62,7 @@
 
   function system(spec, ctx) {
     var fig = null, api = null;
-    var inner = { station: ctx.station, pick: ctx.pick, caption: function () { if (!fig || !api) return; api.say = fig.say; api.credit = fig.credit; ctx.caption(); } };
+    var inner = { station: ctx.station, pick: ctx.pick, caption: function () { if (!fig || !api) return; api.say = fig.say; api.note = fig.note; api.credit = fig.credit; ctx.caption(); } };
     fig = Views.make('figure', Object.assign({ parts: spec.parts }, FLAT), inner);
     var root = fig.el, bar = root.querySelector('.cellv__bar'), stage = root.querySelector('.cellv__stage');
     var b3 = h('button', 'cellv__mode', 'The real chest in 3D'); b3.type = 'button'; b3.setAttribute('aria-pressed', 'false');
@@ -134,7 +134,7 @@
       if (on) {
         Array.prototype.forEach.call(bar.querySelectorAll('.cellv__mode'), function (b) { if (b !== b3) b.setAttribute('aria-pressed', 'false'); });
         Array.prototype.forEach.call(stage.querySelectorAll('.cellv__svg'), function (s) { s.style.visibility = 'hidden'; });
-        api.say = 'A real human chest, measured from one body. Remove the ribs, the muscles or the lungs to see the parts under them'; api.credit = CREDIT_B;
+        api.say = 'A real human chest, measured from one body. Remove the ribs, the muscles or the lungs to see the parts under them'; api.note = ''; api.credit = CREDIT_B;
         ctx.caption();
         load();
         if (A) { A.resize(); A.kick(); }
@@ -143,9 +143,9 @@
       }
     }
     b3.addEventListener('click', function () { set3(true); });
-    Array.prototype.forEach.call(bar.querySelectorAll('.cellv__mode'), function (b) { if (b !== b3) b.addEventListener('click', function () { set3(false); api.say = fig.say; api.credit = fig.credit; ctx.caption(); }); });
+    Array.prototype.forEach.call(bar.querySelectorAll('.cellv__mode'), function (b) { if (b !== b3) b.addEventListener('click', function () { set3(false); api.say = fig.say; api.note = fig.note; api.credit = fig.credit; ctx.caption(); }); });
     api = {
-      el: root, say: fig.say, credit: fig.credit, labels: Object.assign({}, fig.labels, { ribs: 'ribs', intercostal: 'intercostal muscles', diaphragm: 'diaphragm' }),
+      el: root, say: fig.say, note: fig.note, credit: fig.credit, labels: Object.assign({}, fig.labels, { ribs: 'ribs', intercostal: 'intercostal muscles', diaphragm: 'diaphragm' }),
       focus: function (part) {
         lit = part || null;
         if (part && IN3D[part]) {
@@ -157,7 +157,7 @@
         if (on3 && part) set3(false);
         if (on3 && !part) { paint(); return; }
         fig.focus(part);
-        api.say = fig.say; api.credit = fig.credit;
+        api.say = fig.say; api.note = fig.note; api.credit = fig.credit;
       },
       start: function () { if (on3 && A) { A.resize(); A.kick(); } },
       stop: function () {}

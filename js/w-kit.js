@@ -213,13 +213,15 @@
     var lastD = 0, lastN = false, lastH = 0;
     /* In the picture's column the drawing, its key and its read-outs must all fit with nothing to scroll: a tall drawing
        (one whole body) ran under the stations' bar and hid its gauges (this lab, 21 Nov 2026). The room is what the column
-       holds, less everything in the pack that is not the drawing; 0 when the drawing is not in the column. */
+       holds, less everything in the pack that is not the drawing; 0 when the drawing is not in the column. In a short window
+       the drawing is a little smaller rather than the column scrolling (docs/PICTURE-STANDARD.md F): at 1024 x 768 the
+       breathing chest's pins key and gauges leave it 203 px, under the 220 this once kept (28 Nov 2026) */
     function art() { return S.svg.isConnected ? S.svg : S.fig.firstElementChild; }
     function roomFor() {
       var hs = document.getElementById('simHost'), a = art();
       if (!hs || hs.hidden || !a || !hs.contains(S.fig)) return 0;
       var st = global.getComputedStyle(hs), inner = hs.clientHeight - parseFloat(st.paddingTop) - parseFloat(st.paddingBottom);
-      return Math.max(220, Math.floor(inner - (pack.getBoundingClientRect().height - a.getBoundingClientRect().height)));
+      return Math.max(140, Math.floor(inner - (pack.getBoundingClientRect().height - a.getBoundingClientRect().height)));
     }
     function fit() {
       var ww = wrap.getBoundingClientRect().width; if (!ww) return;
@@ -231,11 +233,18 @@
       S.svg.style.width = ''; S.svg.style.margin = '';
       setLayout(d, narrow, H);
       if (H && S.svg.isConnected) {
-        /* narrower, so the names keep their size: the margins are worked out again for the new width */
-        for (var i = 0; i < 4; i++) {
-          var vb = S.svg.viewBox.baseVal, need = d * vb.height / vb.width;
-          if (need <= H + 1) break;
-          d = Math.max(190, d * H / need); setLayout(d, narrow, H);
+        /* narrower, so the names keep their size: the margins are worked out again for each width. A narrower drawing gives
+           its names more of its frame, so its height falls faster than its width: the widest drawing that fits the room is
+           found by halves (one ratio overshot: the body of From active muscles to deeper breathing stood 295 px tall where
+           the column had 410, 28 Nov 2026) */
+        var vb = S.svg.viewBox.baseVal;
+        if (d * vb.height / vb.width > H + 1) {
+          var lo = 190, hi = d;
+          for (var i = 0; i < 10; i++) {
+            var mid = (lo + hi) / 2; setLayout(mid, narrow, H); vb = S.svg.viewBox.baseVal;
+            if (mid * vb.height / vb.width <= H + 1) lo = mid; else hi = mid;
+          }
+          d = lo; setLayout(d, narrow, H);
         }
         if (d < D - 1) { S.svg.style.width = n1(d) + 'px'; S.svg.style.margin = '0 auto'; }
       } else S.fig.style.setProperty('--art-h', H ? H + 'px' : 'none');

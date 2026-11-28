@@ -91,20 +91,30 @@
 .viewhost[hidden]{display:none}
 .view{flex:1;min-height:0;display:flex;flex-direction:column}
 .view[hidden]{display:none}
-.said{position:relative;z-index:4;margin:0;padding:8px 16px 12px;text-align:center;border-top:1px solid var(--col-line);background:var(--col-bg)}
+/* The caption is one line (Daniel, 27 Nov 2026, for every lab: "too much text that impedes the visualization. Text should be
+   on the right"; docs/PICTURE-STANDARD.md F): what the picture shows, and an i beside it for what the picture leaves out or
+   draws to scale, and who made it (js/plate.js caption; the Membrane and Cells Labs' caption) */
+.said{position:relative;z-index:4;margin:0;display:flex;align-items:center;justify-content:center;gap:7px;padding:5px 14px 6px;
+  line-height:1.35;text-align:center;border-top:1px solid var(--col-line);background:var(--col-bg)}
 .said:empty{display:none}
-.said__name{display:block;font-size:14px;font-weight:600;color:var(--col-ink)}
-.said__credit{display:block;font-size:11.5px;color:var(--col-soft);margin-top:2px}
-/* a picture of several photographs: its credits folded under it (Daniel, 4 Nov 2026), open upwards into the picture's space */
-.said__fold{margin-top:3px;font-size:12.5px;color:var(--col-soft)}
-.said__fold summary{display:inline-flex;align-items:center;gap:5px;cursor:pointer;padding:2px 8px;border-radius:6px;list-style:none}
-.said__fold summary::-webkit-details-marker{display:none}
-.said__fold summary::before{content:'\25B8';font-size:11px}
-.said__fold[open] summary::before{content:'\25BE'}
-.said__fold summary:hover{color:var(--col-ink)}
-.said__fold summary:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
-.said__list{margin:4px auto 0;padding:0;list-style:none;text-align:left;display:inline-block;max-width:100%;line-height:1.45}
-.said__list b{color:var(--col-ink);font-weight:600}
+.said__name{display:block;min-width:0;font-size:13px;font-weight:600;color:var(--col-ink)}
+.said__i{display:inline-grid;place-items:center;position:relative;flex:none;width:21px;height:21px;margin:0;padding:0;
+  border-radius:50%;border:1.5px solid var(--col-line);background:var(--col-card);color:var(--col-ink);
+  font:italic 700 12.5px/1 Georgia,'Times New Roman',serif;cursor:pointer}
+.said__i::before{content:"";position:absolute;inset:-8px}
+.said__i:hover,.said__i[aria-expanded="true"]{border-color:var(--accent);color:var(--accent)}
+.said__i:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.said__more{position:absolute;left:12px;right:12px;bottom:calc(100% + 6px);z-index:8;display:block;text-align:left;
+  padding:10px 14px 11px;border-radius:10px;background:var(--col-card);border:1px solid var(--col-line);
+  box-shadow:0 8px 24px rgba(0,0,0,.35);font-size:12.5px;line-height:1.45;color:var(--col-ink)}
+.said__more[hidden]{display:none}
+.said__note{display:block;margin:0 0 6px;font-size:13px;line-height:1.45;color:var(--col-ink)}
+.said__credit{display:block;margin:0;font-size:12px;color:var(--col-soft)}
+.said__h{display:block;margin-bottom:3px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--col-soft)}
+.said__list{display:block}
+.said__li{display:block;margin-top:2px}
+.said__li b{color:var(--col-ink);font-weight:600}
+@media (max-width:540px){ .said__i{width:26px;height:26px} }
 .sim{flex:1;min-height:0;overflow:auto;padding:12px 14px 16px;display:flex;flex-direction:column}
 .sim[hidden]{display:none}
 .sim .widget{margin-top:0;border:none;box-shadow:none;background:transparent;padding:0}
@@ -333,8 +343,6 @@ html[data-lab-tab="do"] .viewcol #viewHost .lb{display:none}
 .exam-part[class*="exam-part--"] .xcard__b{border-color:var(--pt-ink)}
 .exam-part[class*="exam-part--"] .xcard__h:focus-visible{outline-color:var(--pt-ink)}
 
-/* the photographs (stations 1 and 3): each one names itself; their credits are folded under the picture (.said__fold) */
-
 /* on a phone, two photographs a row: at three, a tile's name and its line ran out of the top of the tile (4 Nov 2026) */
 
 /* the body's defences (station 2) */
@@ -493,6 +501,7 @@ html[data-lab-tab="do"] .viewcol #viewHost .lb{display:none}
 .pinfo summary:focus-visible{outline:2px solid var(--c3-air);outline-offset:2px}
 .pinfo__t{position:absolute;right:0;bottom:32px;width:min(330px,calc(100vw - 40px));margin:0;padding:9px 12px;border-radius:10px;background:rgba(10,18,26,.94);border:1px solid rgba(255,255,255,.2);text-align:left}
 .pinfo__say{display:block;font-size:13px;font-weight:600;line-height:1.35;color:var(--c3-ink)}
+.pinfo__note{display:block;margin-top:3px;font-size:12.5px;line-height:1.4;color:var(--c3-ink)}
 .pinfo__credit{display:block;margin-top:3px;font-size:11.5px;line-height:1.35;color:var(--c3-soft)}
 .c3k.c3k--over{position:absolute;z-index:2;left:50%;bottom:8px;transform:translateX(-50%);width:max-content;max-width:calc(100% - 84px);gap:2px 9px;padding:3px 10px;font-size:11.5px;border:0;border-radius:var(--r-pill);background:rgba(10,18,26,.76);pointer-events:none}
 .c3k.c3k--over .c3k__i[style*="hidden"]{display:none}
@@ -501,6 +510,22 @@ html[data-lab-tab="do"] .viewcol #viewHost .lb{display:none}
 .sim:has(> .br__pack){padding:6px 8px 8px}
 .br__pack.is-onstage .br__c3{-webkit-mask-image:linear-gradient(to bottom,#000 90%,transparent);mask-image:linear-gradient(to bottom,#000 90%,transparent)}
 @media (min-width:1001px){
+  /* The picture is the priority (Daniel, 27 Nov 2026, the Membrane Lab: "the animation is too small and there's too much text that
+     impedes the visualization. Text should be on the right ... the animation is the priority"; 28 Nov 2026, every lab). On a laptop
+     the picture's column is as wide as the station's own pictures and animations can stand in the window's height (--pr: the width
+     to the height of its widest one, with its names and key; --pf: the height the window keeps for the header, the station bar,
+     the caption and the padding), never narrower than 42 % of the window, and the words keep at least 600 px. The breathing
+     system and Breathing in and out keep 42 %: their 3D chest takes the column's height (tools/space-check.mjs), and a wider
+     column would only give it empty sides; so do Physical activity (one whole body, as tall as the column) and the
+     investigation. Proof: tools/picture-space.mjs. */
+  .stage{--pr:0;--pf:168px;--colw:clamp(42vw, calc((100dvh - var(--pf)) * var(--pr) + 28px), calc(100vw - 600px));
+    grid-template-columns:minmax(360px,var(--colw)) minmax(0,1fr)}
+  .stage:has(> .platecol[data-station="protect"]){--pr:1.17}     /* Mucus and cilia at work */
+  .stage:has(> .platecol[data-station="surface"]){--pr:1.86}     /* its four animations of the alveolus */
+  .stage:has(> .platecol[data-station="air"]){--pr:1.26}
+  .stage:has(> .platecol[data-station="limewater"]){--pr:1.29}
+  /* the tool row takes no line while it holds no button (its fold is a phone's): it was an empty strip of 16 px over every picture */
+  .platecol__tools:not(:has(> .tool:not([hidden]):not(.fold))){display:none}
   .platecol.is-tight .platecol__tools:not(:has(.tool--sim:not([hidden]))),.platecol.is-sim .platecol__tools:not(:has(.tool--sim:not([hidden]))){padding:0}
   .platecol.is-tight[data-kind="breathe"] .viewhost{padding:6px}
 }
